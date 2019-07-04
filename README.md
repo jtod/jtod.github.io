@@ -1,2 +1,2 @@
-# jtod.github.home
-Home page for software projects
+# jtod.github.io
+Home page for John O'Donnell's software projects
