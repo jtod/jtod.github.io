@@ -9,9 +9,10 @@ Sigma16 is a computer architecture for research and teaching
 * [Sigma16](./S16) point to S16 rather than Sigma16 so very old
   version shouldn't be found
 
-* [version 3.0.27](./S16/releases/Sigma16-3.0.27/index.html)
-  Test version, using relative link but to S16 rather than Sigma16
-  
+* [version 3.0.27](./Sigma16/releases/Sigma16-3.0.27/index.html)
+  Test version, using relative link but to S16 rather than Sigma16 but
+  now it was renamed to Sigma16
+
 * [go to test directory](./testdir/index.html) Have removed S16 directory
   
   
