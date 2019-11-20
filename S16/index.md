@@ -1,15 +1,39 @@
 % Sigma16 home page
 
-Sigma16 is a complete system design aimed at teaching and research.
+Sigma16 is a computer architecture for at teaching and research.
 
-The author of the system is [John
+This is free software.  The author is [John
 O'Donnell](https://jtod.github.io/index.html).
+
+The sofware is implemented in javascript, html, and css.  The source
+files are on the project page (jtod.github.io/Sigma16) where you can
+view or download the source.  To run the code, go to
+jtod.github.io/S16.
 
 ## Running the software
 
-### Quick start
+You can run Sigma16 in several ways:
+
+  * [Run the latest release in your
+    browser](./releases/Sigma16-3.0.27/index.html) You need to be
+    connected to the Internet.
+
+  * [Download the source files](jtod.github.io/Sigma16) and visit
+    index.html in a browser. After the download, you won't need to be
+    connected to the Internet, but a few features won't work.  When
+    you open one of the example programs, you need to copy it and
+    paste it into the Editor tab (the button "Copy example to editor"
+    won't work).
+
+  * *Download or build the executable* compiled for your platform.
+    The app will run faster, it has better ability to save files, and
+    it doesn't need access to the Internet.
 
 ### Releases
+
+Some of the previous releases are available here:
+
+* [3.0.28](./releases/3.0.28/index.html) pre-release testing version
 
 * [version 3.0.27](./releases/Sigma16-3.0.27/index.html) Test version
 
