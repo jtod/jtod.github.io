@@ -15,8 +15,7 @@ jtod.github.io/S16.
 You can run Sigma16 in several ways:
 
   * [Run the latest release in your
-    browser](./releases/Sigma16-3.0.27/index.html) You need to be
-    connected to the Internet.
+    browser](./releases/3.0.29/index.html)
 
   * [Download the source files](jtod.github.io/Sigma16) and visit
     index.html in a browser. After the download, you won't need to be
@@ -31,7 +30,9 @@ You can run Sigma16 in several ways:
 
 ### Releases
 
-Some of the previous releases are available here:
+Previous releases
+
+* [3.0.29](./releases/3.0.29/index.html) pre-release testing version
 
 * [3.0.28](./releases/3.0.28/index.html) pre-release testing version
 
