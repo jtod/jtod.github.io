@@ -28,10 +28,11 @@ You can run Sigma16 in several ways:
     The app will run faster, it has better ability to save files, and
     it doesn't need access to the Internet.
 
+### Development
+
+* [development version](./dev/index.html) pre-release
+
 ### Releases
-
-* [development version (pre-release)](./dev/index.html) pre-release
-
 
 Previous releases
 
