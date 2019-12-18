@@ -30,6 +30,9 @@ You can run Sigma16 in several ways:
 
 ### Releases
 
+* [development version (pre-release)](./dev/index.html) pre-release
+
+
 Previous releases
 
 * [3.0.32](./releases/3.0.32/index.html) pre-release testing version
