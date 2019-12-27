@@ -1,10 +1,6 @@
-// editor.js
-
+// Sigma16: editor.js
 
 let currentFile = null;  // Remember the current working file handle
-
-// save file in downloads
-
 
 function editorDownload () {
     console.log ("editorPrepareDownload");
@@ -15,14 +11,18 @@ function editorDownload () {
 }
 
 function handleSelectedFiles (flist) {
-    console.log("handleSelectedFiles changed");
-//    console.log(flist);
+    console.log("handleSelectedFiles");
+    let m;
     for (let i=0; i<flist.length; i++) {
-	console.log (`file ${i}`);
-	openFiles[i] = flist[i];
-	openFilesReaders[i] = mkOfReader(i);
-	openFilesText[i] = "";
-	openFilesReaders[i].readAsText(openFiles[i]);
+	m = mkModule ();
+	m.mFile = flist[i];
+	m.hasFile = true;
+	m.selected = false;
+	m.fileReader = mkOfReader(nModules);
+	m.modSrc = "";
+	m.fileReader.readAsText(m.mFile);
+	s16modules.push(m);
+	nModules++;
     }
 }
 
@@ -31,37 +31,55 @@ function mkOfReader (i) {
     let fr = new FileReader();
     fr.onload = function (e) {
 	console.log (`ofReader ${i} onload event`);
-	openFilesText[i] = e.target.result.split('\n');
+	s16modules[i].modSrc = e.target.result;
     }
     return fr;
 }
 
-function showFiles() {
-    console.log ('showFiles');
+function showModules() {
+    console.log ('showModules');
     let xs;
     let ys = "";
-    for (let i=0; i<openFiles.length; i++) {
-	ys += `file ${i}\n`;
-	xs = openFilesText[i];
-	ys += xs.slice(0,4).join('\n');
-	ys += "\n\n\n";
+    let sel;
+    let spanClass;
+    let modName;
+    let m;
+    for (let i=0; i<nModules; i++) {
+	m = s16modules[i];
+	modName = "<anonymous>";
+	sel = selectedModule===i;
+	spanClass = sel ? " class='SELECTEDFILE'" : " class='UNSELECTEDFILE'";
+	ys += (sel ? '* ' : '  ')
+	    + `<span${spanClass}>` + `Module ${i} </span>`
+	    + `<button onclick="modulesButtonSelect(${i})">Select</button>`
+	    + `<button onclick="modulesButtonClose(${i})">Close</button>`
+	    + `<button onclick="modulesButtonRefresh(${i})">Refresh</button>`
+	    + '\n<pre>'
+	    + m.modSrc.split('\n').slice(0,4).join('\n')
+	    + '</pre>\n\n\n';
     }
-    editorBufferTextArea.value = ys;
+    console.log (spanClass);
+    console.log (ys);
+    let elt = document.getElementById('FilesBody');
+    elt.innerHTML = ys;
 }
 
-function refreshFiles () {
-    openFilesIndex = 0;
-    refreshFilesLooper();
+function modulesButtonSelect (i) {
+    console.log (`modulesButtonSelect ${i}`);
+    s16modules[selectedModule].selected = false;
+    selectedModule = i;
+    s16modules[i].selected = true;
+    editorBufferTextArea.value = s16modules[i].modSrc;
 }
 
-function refreshCurrentFile() {
-    console.log ("refreshCurrentFile");
-    fileContents = fileReader.readAsText(currentFile);
-    console.log (fileContents);
+// Need to be careful about this affecting refresh, as i has been
+// baked into the file reader
+function modulesButtonClose (i) {
+    console.log (`filesButtonClose ${i}`);
 }
 
-//	console.log (xs.slice(0,100));
-//	console.log (`\n\n`);
-//	console.log (xs);
-//	console.log (ys);
-	
+// need to set event handler to refresh the modules list
+function modulesButtonRefresh (i) {
+    console.log (`filesButtonRefresh ${i}`);
+    s16modules[i].fileReader.readAsText(s16modules[i].mFile);
+}

@@ -1,4 +1,6 @@
-// Sigma16.  Copyright (c) 2019 John O'Donnell
+// Sigma16: gui.js
+// This is the main program, lauched by Sigma16.html
+// Copyright (c) 2019 John O'Donnell
 
 //---------------------------------------------------------------------------
 // Global variables
@@ -18,12 +20,6 @@ var textbox; /* for save download */
 
 var ioLogBuffer = "";
 
-const fileReader = new FileReader();
-let openFiles = [];
-let openFilesReaders = [];
-let openFilesText = [];
-let openFilesIndex = 0;
-
 function refreshIOlogBuffer() {
     console.log (`refreshIOlogBugfer ${ioLogBuffer}`);
     let elt = document.getElementById("IOlog");
@@ -31,14 +27,12 @@ function refreshIOlogBuffer() {
     elt.scrollTop = elt.scrollHeight;
 }
 
-
 // global variables for emulator
 var procAsmListingElt;
 
 //---------------------------------------------------------------------------
 // Experiments and testing
 //---------------------------------------------------------------------------
-
 
 function jumpToAnchorInGuide () {
     console.log ("jumpToAnchorInGuide");
@@ -366,6 +360,7 @@ function hideTabbedPane(paneId) {
 function hideAllTabbedPanes() {
     hideTabbedPane("WelcomePane");
     hideTabbedPane("ExamplesPane");
+    hideTabbedPane("ModulesPane");
     hideTabbedPane("EditorPane");
     hideTabbedPane("AssemblerPane");
     hideTabbedPane("LinkerPane");
@@ -390,6 +385,12 @@ function welcome_pane_button() {
 function examples_pane_button() {
     hideAllTabbedPanes();
     showTabbedPane("ExamplesPane");
+}
+
+function files_pane_button() {
+    console.log("files_pane_button clicked")
+    hideAllTabbedPanes();
+    showTabbedPane("ModulesPane");
 }
 
 function editor_pane_button() {
@@ -635,24 +636,8 @@ window.onload = function () {
     initializeProcessorElements ();  // so far, it's just instr decode
     clearInstrDecode (emulatorState);
     
-    // Hide the dialogues and popups
-//    document.getElementById("BreakDialogue").style.display = "none";
     hideBreakDialogue ();
 
-    // Initialize file/module
-
-    // not currently using this; using openFilesReaders instead (editor&gui)
-    fileReader.onload = function (e) {
-	console.log(`fileReader.onload activated, idx=${openFilesIndex}`);
-	openFilesText[openFilesIndex] = e.target.result;
-	editorBufferTextArea.value = openFilesText[openFilesIndex];
-	                       // change this ????
-	openFilesIndex++;
-	refreshFilesLooper ();
-}
-//    console.log(xs);
-
-    
 // Initialize the modules
     initModules ();
 
