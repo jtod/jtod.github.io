@@ -1,4 +1,23 @@
 // Sigma16: editor.js
+// Copyright (c) 2019 John T. O'Donnell.  <john dot t dot odonnell9 at gmail.com>
+// License: GNU GPL Version 3 or later. See Sigma6/ LICENSE.txt, LICENSE-NOTICE.txt
+
+// This file is part of Sigma16.  Sigma16 is free software: you can
+// redistribute it and/or modify it under the terms of the GNU General
+// Public License as published by the Free Software Foundation, either
+// version 3 of the License, or (at your option) any later version.
+// Sigma16 is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.  You should have received
+// a copy of the GNU General Public License along with Sigma16.  If
+// not, see <https://www.gnu.org/licenses/>.
+
+//-------------------------------------------------------------------------------
+// editor.js provides a minimal text editor for writing and modifying
+// code, both assembly language and object code.
+
+//-------------------------------------------------------------------------------
 
 let currentFile = null;  // Remember the current working file handle
 
@@ -39,24 +58,27 @@ function mkOfReader (i) {
 function showModules() {
     console.log ('showModules');
     let xs;
-    let ys = "";
+    let ys = "\n<hr>";
     let sel;
     let spanClass;
-    let modName;
+    let mName;
     let m;
     for (let i=0; i<nModules; i++) {
 	m = s16modules[i];
-	modName = "<anonymous>";
+	mName = getModName(m);
 	sel = selectedModule===i;
 	spanClass = sel ? " class='SELECTEDFILE'" : " class='UNSELECTEDFILE'";
-	ys += (sel ? '* ' : '  ')
-	    + `<span${spanClass}>` + `Module ${i} </span>`
+	ys += `&nbsp;`
+	    +`<span${spanClass}>${i}${(sel ? '* ' : '  ')}. Module ${mName}</span>`
 	    + `<button onclick="modulesButtonSelect(${i})">Select</button>`
 	    + `<button onclick="modulesButtonClose(${i})">Close</button>`
 	    + `<button onclick="modulesButtonRefresh(${i})">Refresh</button>`
-	    + '\n<pre>'
-	    + m.modSrc.split('\n').slice(0,4).join('\n')
-	    + '</pre>\n\n\n';
+            + `<br>hasFile=${m.hasFile} fileName=${m.fileName} modName=${m.modName}`
+            + `<br>nAsmErrors=${m.nAsmErrors} isExecutable=${m.isExecutable}`
+	    + '<br><pre>'
+	    + m.modSrc.split('\n').slice(0,8).join('\n')
+	    + '</pre>\n\n'
+            + '<hr>\n\n';
     }
     console.log (spanClass);
     console.log (ys);
