@@ -2,7 +2,7 @@
 
 ### [Sigma16](https://jtod.github.io/S16/)
 
-[Sigma16](https://jtod.github.io/Sigma16/) is an instruction set architecture with software tools, including an assembler, emulator, and a digital circuit.
+[Sigma16](https://jtod.github.io/Sigma16/home) is an instruction set architecture with software tools, including an assembler, emulator, and a digital circuit.
 
 ### [Hydra](https://github.com/jtod/Hydra)
 
