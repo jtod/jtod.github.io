@@ -14,9 +14,14 @@ and download the source code, see the [source
 repository](https://github.com/jtod/Sigma16).  You can't run the app
 directly from the source repository; you need this home page to launch
 it.  The [User
-Guide](https://jtod.github.io/home/Sigma16/releases/3/0.34/docs/html/userguide/userguide.html)
+Guide](https://jtod.github.io/home/Sigma16/releases/3.0.34/docs/html/userguide/userguide.html)
 includes documentation of the architecture, programming, and
 installation.
+
+Test link
+
+<div class="quickstartbox"> [TESTING link Click to run Sigma16 in your
+  browser](https://github.com/jtod/Sigma16/releases/3.0.34/app/Sigma16.html)</div>
 
 ## Introduction to the architecture
 
