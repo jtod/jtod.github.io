@@ -29,6 +29,7 @@ main module
 foo  import   Mod1
 bar  import   Mod1
 baz  import   Mod2
+fcn  import   Mod2
      export   x
      export   y
      export   sum
@@ -67,12 +68,26 @@ loop load     R8,$abcd[R0]
      jumpf    R7,12[R2]
      jumpt    R8,13[R3]
      jal      R13,goodlabel[R0]
-     testset  R5,x[R0]
+     testset  R5,mutex[R0]
+mutex data     0
 
 ; EXP1
      rfi
 
 ; EXP2
+
+       getctl   R2,req
+       putctl   R4,status
+       putctl   R4,mask
+       putctl   R4,req
+       putctl   R4,istat
+       putctl   R4,ipc
+       putctl   R4,vect
+       putctl   R4,psegBeg
+       putctl   R4,psegEnd
+       putctl   R4,dsegBeg
+       putctl   R4,dsegEnd
+
      save     R2,R7,3[R14]
      restore  R2,R7,3[R14]
      getctl   R3,req
@@ -83,12 +98,16 @@ loop load     R8,$abcd[R0]
      top      R1,R11,R10
      shiftl   R5,R3,7
      shiftr   R5,R3,8
+       shiftl   R5,R2,7
+       shiftr   R1,R12,13
      extract  R2,R3,5,6
+       extract  R2,R13,4,7   
      extracti R2,R3,5,6
      inject   R2,R3,5,6
      injecti  R2,R3,5,6
      logicw   R1,R2,R3,6
      logicb   R1,R2,R3,6,13
+;       dispatch R8,13
 
 ; Pseudoinstructions
      jumple   17[R1]       ; jumpc0
@@ -110,7 +129,7 @@ loop load     R8,$abcd[R0]
      ornew    R6,R7,R8     ; logicw
      xornew   R6,R7,R8     ; logicw
 
-     invb     R6,R7,15     ; logicb
+def  invb     R6,R7,15     ; logicb
      andb     R6,R7,R8,15  ; logicb
      orb      R6,R7,R8,15  ; logicb
      xorb     R6,R7,R8,15  ; logicb
@@ -128,3 +147,7 @@ sum      data    $03f2  ; hex
 y        data   $01a3   ; hex
 v1       data   -23     ; negative integer
 frame    data   0
+abc    data     42
+       data     -3
+       data     $2ca3
+       data     def
