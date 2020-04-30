@@ -1,5 +1,5 @@
 // Sigma16: gui.js
-// Copyright (C) 2019, 2020 John T. O'Donnell
+// Copyright (C) 2020 John T. O'Donnell
 // email: john.t.odonnell9@gmail.com
 // License: GNU GPL Version 3 or later. See Sigma16/README.md, LICENSE.txt
 
@@ -14,13 +14,40 @@
 // a copy of the GNU General Public License along with Sigma16.  If
 // not, see <https://www.gnu.org/licenses/>.
 
-//-------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // gui.js is the main program.  It's launched by Sigma16.html and is
 // the last JavaScript file to be loaded
+//-----------------------------------------------------------------------------
+
+"use strict";
+// import {sayHi} from "./testmodule.js";
 
 //-------------------------------------------------------------------------------
-// Parameters
+// Global variables for gui.js
 //-------------------------------------------------------------------------------
+
+let globalObject = this; // to enable script in userguide to define glob var
+let myglobalvar = 9876; // can script in userguide see this?
+
+let fileContents = "file not read yet"
+let editorBufferTextArea; /* set when window.onload */
+let textFile = null; /* for save download */
+let create;  /* for save download */
+let textbox; /* for save download */
+let ioLogBuffer = "";
+let procAsmListingElt; // global variables for emulator
+
+// Persistent variables given values by initialize_mid_main_resizing ()
+let windowWidth;     // inner width of entire browser window
+let middleSection;  // the middle section of the window; set in onload
+let midMainLeft;     // mid-main-left; set in onload
+let midMainRight;     // mid-main-right; set in onload, not used anywhere
+let midLRratio = 0.6;  // width of midMainLeft / midMainRight; set in onLoad
+let midSecExtraWidth = 15;  // width of borders in px
+
+//-----------------------------------------------------------------------------
+// Parameters
+//-----------------------------------------------------------------------------
 
 // Calculate the value of pxPerChar, which is needed to control the
 // scrolling to make the current line visible.  The calculated value
@@ -72,24 +99,9 @@ let developer = {
 }
 
 
-//-------------------------------------------------------------------------------
-// Global variables
-//-------------------------------------------------------------------------------
-
-// Define the global variables; some are set by function initialize
-// which is executed when window.onload occurs
-
-var globalObject = this; // to enable script in userguide to define glob var
-var myglobalvar = 9876; // can script in userguide see this?
-
-var fileContents = "file not read yet"
-var editorBufferTextArea; /* set when window.onload */
-var textFile = null; /* for save download */
-var create;  /* for save download */
-var textbox; /* for save download */
 
 function makeTextFile (text) {
-    var data = new Blob([text], {type: 'text/plain'});
+    let data = new Blob([text], {type: 'text/plain'});
 
     // If we are replacing a previously generated file we need to
     // manually revoke the object URL to avoid memory leaks.
@@ -102,7 +114,6 @@ function makeTextFile (text) {
     return textFile;
 }
 
-var ioLogBuffer = "";
 
 function refreshIOlogBuffer() {
     console.log (`refreshIOlogBugfer ${ioLogBuffer}`);
@@ -110,9 +121,6 @@ function refreshIOlogBuffer() {
     elt.innerHTML = "<pre>" + ioLogBuffer + "</pre>";
     elt.scrollTop = elt.scrollHeight;
 }
-
-// global variables for emulator
-var procAsmListingElt;
 
 //-------------------------------------------------------------------------------
 // Experiments and testing
@@ -132,7 +140,7 @@ function tryfoobar () {
 /* Try to make button go to a point in the user guide */
     console.log ('trySearchUserguide');    
 /*
-    var midmainright = document.getElementById('MidMainRight');
+    let midmainright = document.getElementById('MidMainRight');
     console.log ('midmainright = ' + midmainright);
     usrguidecontent = document.getElementById("WelcomeHtml").innerHTML;
     console.log ('usrguidecontent = ' + usrguidecontent);
@@ -160,17 +168,17 @@ function jumpToAnchor (target){
 
 // measure time for n register put operations
 function measureRegPut (n) {
-    var tstart = performance.now();
-    for (var i = 0; i<n; i++) {
+    let tstart = performance.now();
+    for (let i = 0; i<n; i++) {
 	pc.put(i);
     }
-    var tend = performance.now();
+    let tend = performance.now();
     console.log('measureRegRefresh (' + n + ') took '
 		+ (tend - tstart) + ' ms');
 }
 
 // function springen(anker) { 
-//    var childWindow =  document.getElementById("UserGuideIframeId").contentWindow;
+//    let childWindow =  document.getElementById("UserGuideIframeId").contentWindow;
 //     childWindow.scrollTo(0,childWindow.document.getElementById(anker).offsetTop);
 // }
 
@@ -196,11 +204,21 @@ function editorButton1() {
     console.log("UserGuideElt = " + userGuideElt);
     window.location.hash = "#HREFTESTING";
 	
-//    var loc = userGuideElt.location;
+//    let loc = userGuideElt.location;
 //    console.log ("ed button 1, loc = " + loc);
 //    loc.href = "#HREFTESTING";
     
 }
+
+//-----------------------------------------------------------------------------
+// Dialogues with the user
+
+function modalWarning (msg) {
+    alert (msg);
+}
+
+//-----------------------------------------------------------------------------
+
 
 //-------------------------------------------------------------------------------
 // Examples pane
@@ -236,8 +254,8 @@ function copyExampleToClipboard () {
 }
 
 
-// var myIFrame = document.getElementById("myIframe");
-// var content = myIFrame.contentWindow.document.body.innerHTML;
+// let myIFrame = document.getElementById("myIframe");
+// let content = myIFrame.contentWindow.document.body.innerHTML;
 
 //-------------------------------------------------------------------------------
 // Editor pane
@@ -269,14 +287,6 @@ function editorClear () {
 // mid main rigth width = 393.35
 //   left + right width = 965.2
 
-// Persistent variables given values by initialize_mid_main_resizing ()
-
-var windowWidth;     // inner width of entire browser window
-var middleSection;  // the middle section of the window; set in onload
-var midMainLeft;     // mid-main-left; set in onload
-var midMainRight;     // mid-main-right; set in onload, not used anywhere
-var midLRratio = 0.6;  // width of midMainLeft / midMainRight; set in onLoad
-var midSecExtraWidth = 15;  // width of borders in px
 
 // Initialize the variables (middleSection, midMainLeft, midMainRight)
 // in the onload event, because the DOI elements must exist before the
@@ -403,12 +413,6 @@ function checkTestBody () {
 //    console.log ('checkTestBody width = ' + testPaneBodyElt.style.width);
 }
 
-// deprecated, delete
-/* initialize sizes of left and right parts of middle section */
-//    let y = (w+ 10*x) + "px";
-//    document.getElementById("AssemblerText").style.width = z + 'px';
-// var testPaneBodyElt;
-//    testPaneBodyElt = document.getElementById('TestPaneBody');
 
 
 
@@ -579,83 +583,23 @@ window.onresize = function () {
     console.log ('window.onresize finished');
 }
 
-
-
-// https://stackoverflow.com/questions/31048215/how-to-create-txt-file-using-javascript-html5
-
-let myblob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
-
-function foobarSaveAs () {
-    saveAs(blob, "hello-world-file.txt");
-}
-
-
-
-/*
-https://www.codeproject.com/Questions/896991/create-file-by-javascript
-So, we just need to call the script on window onload like.
-Hide   Expand    Copy Code
-window.onload = function(){
-            var textFile = null,
-
-            makeTextFile = function (text) {
-                                var data = new Blob([text], {type: 'text/plain'});
-
-                                // If we are replacing a previously generated file we need to
-                                // manually revoke the object URL to avoid memory leaks.
-                                if (textFile !== null) {
-                                  window.URL.revokeObjectURL(textFile);
-                                }
-
-                                textFile = window.URL.createObjectURL(data);
-
-                                return textFile;
-                            };
-
-            var create = document.getElementById('create'),
-            textbox = document.getElementById('textbox');
-
-            create.addEventListener('click', function () {
-                                                var link = document.getElementById('downloadlink');
-                                                link.href = makeTextFile(textbox.value);
-                                                link.style.display = 'block';
-                                            }, false);
-        };
-
-*/
-
 //-------------------------------------------------------------------------------
 // Complete initialization when onload occurs
 //-------------------------------------------------------------------------------
 
 window.onload = function () {
-    
     console.log("window.onload activated");
-
-//    s16modules = [];    // All the modules in the system
-//    nModules = 1;
-//    selectedModule = 0;
-    initModules();
-
-    showTabbedPane("WelcomePane");
+    initModules ();
     initializeProcessorElements ();  // so far, it's just instr decode
     clearInstrDecode (emulatorState);
-    
     hideBreakDialogue ();
-
-// Initialize the modules
-    initModules ();
     document.getElementById('LinkerText').innerHTML = "";    
 
-// Initialize the registers
-
-    // Register file
-    // R0 is built specially as it is constant; all others are built with mkReg
-
-    nRegisters = 0;
-    for (var i = 0; i<16; i++) {
+    // Build the register file; R0 is built specially as it is
+    // constant; all others are built with mkReg
+    for (let i = 0; i<16; i++) {
 	let regname = 'R' + i; // also the id for element name
-//	console.log('xx' + regname + 'xx');
+        let thisReg;
 	thisReg = (i==0) ?
 	    mkReg0 (regname, regname, wordToHex4)
 	    : mkReg (regname, regname, wordToHex4);
@@ -664,47 +608,42 @@ window.onload = function () {
 	register[i] = thisReg;
     }
 
-// Instruction control registers
-    pc       = mkReg ('pc',       'pcElt',       wordToHex4);
-    ir       = mkReg ('ir',       'irElt',       wordToHex4);
-    adr      = mkReg ('adr',      'adrElt',      wordToHex4);
-    dat      = mkReg ('dat',      'datElt',      wordToHex4);
-    //    sysStat  = mkReg ('sysStat',  'sysStatElt',  showSysStat);
+    // Instruction control registers
+    pc    = mkReg ('pc',       'pcElt',       wordToHex4);
+    ir    = mkReg ('ir',       'irElt',       wordToHex4);
+    adr   = mkReg ('adr',      'adrElt',      wordToHex4);
+    dat   = mkReg ('dat',      'datElt',      wordToHex4);
+
+    // Interrupt control registers
+    statusreg   = mkReg ('statusreg',  'statusElt',  wordToHex4);
     // bit 0 (lsb) :  0 = User state, 1 = System state
     // bit 1       :  0 = interrupts disabled, 1 = interrupts enabled
     // bit 2       :  0 = segmentation disabled, 1 = segmentation enabled
-
-    // Interrupt control registers
-    ctlRegIndexOffset = nRegisters;
-    statusreg   = mkReg ('statusreg',  'statusElt',  wordToHex4);
-//    ienable  = mkReg ('ienable',  'enableElt',  showBit);
-    mask     = mkReg ('mask',     'maskElt',    wordToHex4);
-    req      = mkReg ('req',      'reqElt',     wordToHex4);
-    // mask and request
+    mask  = mkReg ('mask',     'maskElt',    wordToHex4);
+    req   = mkReg ('req',      'reqElt',     wordToHex4);
+    // mask and request use the same bit positions for flags
     // bit 0 (lsb)  overflow
     // bit 1        divide by 0
     // bit 2        trap 3
     // bit 3        
     istat    = mkReg ('istat',    'istatElt',      wordToHex4);
     ipc      = mkReg ('ipc',      'ipcElt',      wordToHex4);
-    vect   = mkReg ('vect',   'vectElt', wordToHex4);
+    vect     = mkReg ('vect',   'vectElt', wordToHex4);
 
 // Segment control registers
-//    sEnable  = mkReg ('sEnable',  'sEnableElt',  showBit);
     bpseg = mkReg ('bpseg',    'bpsegElt',    wordToHex4);
     epseg = mkReg ('epseg',    'epsegElt',    wordToHex4);
     bdseg = mkReg ('bdseg',    'bdsegElt',    wordToHex4);
     edseg = mkReg ('edseg',    'edsegElt',    wordToHex4);
 
 // Record the control registers    
-    nRegisters = 16;  // Start after the first 16 (the regfile)
     controlRegisters =
 	[pc, ir, adr, dat,   // not accessible to getctl/putctl instructions
 	 // the following can be used for getctl/getctl, indexing from 0
-	 statusreg,
-	 mask, req, istat, ipc, vect,
+	 statusreg, mask, req, istat, ipc, vect,
          bpseg, epseg, bdseg, edseg
 	];
+    nRegisters = 16;  // Start after the first 16 (the regfile)
     controlRegisters.forEach (function (r) {
 	console.log('making reg ' + nRegisters + ' = ' + r.regName);
 	register[nRegisters] = r;
@@ -712,63 +651,15 @@ window.onload = function () {
 	nRegisters++;
         });
 
-
-// Initialize the memory
     memInitialize();
     procAsmListingElt = document.getElementById('ProcAsmListing');
-    
     editorBufferTextArea = document.getElementById("EditorTextArea");
-    
-/* for save download */
-//    create = document.getElementById('CreateFileForDownload'),
-//    textbox = document.getElementById('DownloadFileTextBox');
-//  create.addEven
-//    var link = document.getElementById('downloadlink');
-//    link.href = makeTextFile(textbox.value);
-//    link.style.display = 'block';
-    //  }, false);
-
-
     resetRegisters();
     initialize_mid_main_resizing ();
     setMidMainLRratio(0.65);  // useful for dev to keep mem display visible
     showSizeParameters();
     adjustToMidMainLRratio();
     initializeSubsystems ();
-
-    
+    showTabbedPane("WelcomePane");
     console.log("Initialization complete");
 }
-
-
-/*
-https://stackoverflow.com/questions/31048215/how-to-create-txt-file-using-javascript-html5
-
-(function () {
-var textFile = null,
-  makeTextFile = function (text) {
-    var data = new Blob([text], {type: 'text/plain'});
-
-    // If we are replacing a previously generated file we need to
-    // manually revoke the object URL to avoid memory leaks.
-    if (textFile !== null) {
-      window.URL.revokeObjectURL(textFile);
-    }
-
-    textFile = window.URL.createObjectURL(data);
-
-    return textFile;
-  };
-
-
-  var create = document.getElementById('create'),
-    textbox = document.getElementById('textbox');
-
-  create.addEventListener('click', function () {
-    var link = document.getElementById('downloadlink');
-    link.href = makeTextFile(textbox.value);
-    link.style.display = 'block';
-  }, false);
-})();
-
-*/

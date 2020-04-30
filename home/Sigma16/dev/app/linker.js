@@ -1,5 +1,5 @@
 // Sigma16: linker.js
-// Copyright (C) 2019, 2020 John T. O'Donnell
+// Copyright (C) 2020 John T. O'Donnell
 // email: john.t.odonnell9@gmail.com
 // License: GNU GPL Version 3 or later. See Sigma16/README.md, LICENSE.txt
 
@@ -14,32 +14,76 @@
 // a copy of the GNU General Public License along with Sigma16.  If
 // not, see <https://www.gnu.org/licenses/>.
 
-//-------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // linker.js manipulates object code, including the functions of a
 // linker and loader.  Services include combining a collection of
 // object modules to form an executable module; performing address
 // relocation; and loading an object module into memory.
-// -------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+"use strict";
 
 // refactor
-// var exMod;           // the module that is executing
-var curAsmap = [];
+let curAsmap = [];
 
-//-------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Representation of object module
-//-------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-// Information about object code
-function mkModuleObj () {
-    return {
-        objText : "",      // text of object code
-        objCode  : [],     // lines of object code
-        objStmt  : []      // array of statements in object code
+// An object module is the code for one module; it may contain linker
+// statements and may comprise one or more blocks
+
+class ModuleObj {
+    constructor() {
+        this.objLine = [];                 // lines of code split by newline
+        this.objStmt = [];                 // array of statements in object code
+        this.objMetadataLine = null;  // optional metadata lines
     }
 }
 
+// A Block is a sequence of words in adjacent memory locations.  The
+// functional argument f emits the next word of object code.
+
+class Block {
+    constructor(f) {
+        this.startAddr = 0;
+        this.current = 0;
+        this.words = [];
+        this.f = f;
+    }
+    insert(w) {
+        this.words.push(w);
+    }
+    relocate(x) {
+        this.startAddr = x;
+    }
+    emit () {
+        if (this.current < this.words.length) {
+            this.f (this.current+this.startAddr, this.words[this.current]);
+            this.current++;
+        } else {
+            console.log (`emit: out of data`);
+        }
+        return (this.current >= this.words.length);
+    }
+}
+
+/* Usage
+function fcn (a,w) { console.log (`emit ${a} ${w}`); }
+function testBlock() {
+    let t1 = new Block (fcn);
+    t1.insert(12);
+    t1.insert(34);
+    t1.insert(56);
+    console.log (t1.emit());
+    console.log (t1.emit());
+    console.log (t1.emit());
+    console.log (t1.emit());
+}
+*/
+
 //-------------------------------------------------------------------------------
-// Find and display modules
+// Operations on selected module
 //-------------------------------------------------------------------------------
 
 // Clear the display of the object code in the linker pane
@@ -49,8 +93,7 @@ function clearObjectCode () {
     document.getElementById('LinkerText').innerHTML = listing;
 }
 
-
-// called when Linker: Selected module button is clicked
+// Linker Object code button
 function linkShowSelectedObj () {
     console.log ("linkShowSelectedObj");
     let m = s16modules[selectedModule]; // get current module
@@ -58,24 +101,37 @@ function linkShowSelectedObj () {
         + "<span class='ExecutableStatus'>Module is "
         + (m.objIsExecutable ? "executable" : "not executable" )
         + "</span><br>"
-        + m.objInfo.objCode.join('\n')
+        + m.objInfo.objLine.join('\n')
         + "</pre>";
     document.getElementById('LinkerText').innerHTML = objListing;
-    // dev only
-    //    parseObject (m);
 }
 
 // Called by button in Linker tab; this is used when an object file is
-// to be read in rather than being assembled now
-function readObject () {
-    console.log ('readObject');
+// to be read from editor rather than being created by the assembler
+function readObjectFromEditor () {
+    console.log ('readObjectFromEditor');
     let m = s16modules[selectedModule]; // get current module
     let mo = m.objInfo;
     if (mo) { // it exists, proceed
+        let txt = document.getElementById("EditorTextArea").value;
+        mo.objLine = txt.split("\n");
+        document.getElementById('LinkerText').innerHTML = txt;
     } else { // doesn't exist, error
         console.log ('readObject error: no module');
     }
 }
+
+// Linker Metadata button
+function linkShowMetadata () {
+    console.log ("linkShowMetadata");
+    let m = s16modules[selectedModule]; // get current module
+    let mo = m.objInfo;
+    let md = "<pre class='HighlightedTextAsHtml'>"
+        + (mo.objMetadataLine? mo.objMetadataLine.join("\n") : "no metadata")
+        + "</pre>";
+    document.getElementById('LinkerText').innerHTML = md;
+}
+
 
 function setCurrentObjectCode () {
     let objHeader = "Module " + selectedModule + " object code"
@@ -88,6 +144,37 @@ function setCurrentObjectCode () {
 
 }
 
+// Given source lines for the metadata, build the metadata object for emulator
+function parseObjMetadata (mdLines) {
+    console.log ("parseObjMetadata");
+    console.log (mdLines);
+    let mdAsMap = [];
+    let mdPlainLines = [];
+    let mdDecLines = [];
+    let i = 0;
+    while (i < mdLines.length & mdLines[i] != "Source") {
+        console.log (`asmap entry ${mdLines[i]}`);
+        i++
+    }
+    console.log (`source starts at line ${i} --${mdLines[i]--}`);
+    let nSrcLines = mdLines[i];
+    console.log (`nSrcLines = ${nSrcLines}`);
+    return nSrcLines;
+//    return {mdLines, mdAsMap, mdPlainLines, mdDecLines}
+}
+
+//-------------------------------------------------------------------------------
+// Operations on list of modules
+//-------------------------------------------------------------------------------
+
+
+// Test stub.  Return the list of module numbers for the modules to be
+// linked
+function getLinkModuleList () {
+    console.log ("getLinkModuleList");
+    return [1,2]; // test stub
+}
+
 function showLinkerStatus () {
     console.log ('showLinkerStatus');
     let m = s16modules[selectedModule]; // get current module
@@ -97,9 +184,40 @@ function setLinkerModules () {
     console.log ('setLinkerModules');
 }
 
+
+//-------------------------------------------------------------------------------
+// Linker
+//-------------------------------------------------------------------------------
+
+// linkMods is a list of module numbers of the modules to be linked
+
+
+/*
+function collectLinkModules (linkMods) {
+    let exeMod = selectedModule; // stub
+    console.log ("collectLinkModules");
+    console.log (`exmod=${executable} linkmods=${}`);
+    let mo = s16modules[exeMod]; // module number of the executable
+    let exeLines = mo.objLine;
+    exeLines = [];
+    mo.objLine = []; // clear object lines
+    for (let i = 0; i < linkMods.length; i++) {
+        let hasModuleName = false; // require module name
+        for (let j = 0; j < s16modules[i].objLine.length; j++) {
+            
+        }
+    }
+    
+}
+*/
+
 //-------------------------------------------------------------------------------
 // Booter
 //-------------------------------------------------------------------------------
+
+function checkObject () {
+    console.log ("linker: checkObject");
+}
 
 function boot (es) {
     console.log ("boot");
@@ -114,23 +232,24 @@ function boot (es) {
     memClearAccesses();
     document.getElementById('ProcAsmListing').innerHTML = "";
 
-	es.asmListingPlain = ma.asmListingPlain;
-	es.asmListingDec = ma.asmListingDec;
-        es.asmListingCurrent = [];
-	for (let i = 0; i < es.asmListingDec.length; i++) { // copy the array
-	    es.asmListingCurrent[i] = es.asmListingDec[i];
-	}
-	initListing (m,es);
-	es.nInstructionsExecuted = 0;
-	document.getElementById("nInstrExecuted").innerHTML =
-	    es.nInstructionsExecuted;
-	ioLogBuffer = "";
-	refreshIOlogBuffer();
-        getListingDims(es);
-
+    // get listing from the assembler
+    es.asmListingPlain = ma.asmListingPlain;  // interface
+    es.asmListingDec = ma.asmListingDec;  // interface
     
-    for (let i = 0; i < mo.objCode.length; i++) {
-        xs = mo.objCode[i];
+    es.asmListingCurrent = [];
+    for (let i = 0; i < es.asmListingDec.length; i++) { // copy the array
+	es.asmListingCurrent[i] = es.asmListingDec[i];
+    }
+    initListing (m,es);
+    es.nInstructionsExecuted = 0;
+    document.getElementById("nInstrExecuted").innerHTML =
+	es.nInstructionsExecuted;
+    ioLogBuffer = "";
+    refreshIOlogBuffer();
+    getListingDims(es);
+    
+    for (let i = 0; i < mo.objLine.length; i++) {
+        xs = mo.objLine[i];
         console.log (`boot: object line ${i} = ${xs}`);
         fields = parseObjLine (xs);
         console.log (`op=${fields.operation} args=${fields.operands}`);
@@ -164,9 +283,23 @@ function boot (es) {
         es.curAsmap = ma.asmap;
         showAsmap (es.curAsmap);
         setProcStatus (es,Ready);
+        let xs =  "<pre class='HighlightedTextAsHtml'>"
+            + "<span class='ExecutableStatus'>"
+            + "Boot was successful"
+            + "</span><br>"
+            + "</pre>";
+        document.getElementById('LinkerText').innerHTML = xs;
         console.log ("boot was successful")
     } else {
-        console.log ("boot failed")
+        setProcStatus (es,Reset);
+        let xs =  "<pre class='HighlightedTextAsHtml'>"
+            + "<span class='ExecutableStatus'>"
+            + "Boot failed: module is not executable"
+            + "</span><br>"
+            + "</pre>";
+        document.getElementById('LinkerText').innerHTML = xs;
+        console.log ("boot failed");
+        modalWarning ("boot failed");
     }
     console.log ("boot returning");
 }
@@ -185,7 +318,7 @@ function parseObjLine (xs) {
         operation = splitLine[1];
         operands = splitLine[2].split(',');
       } else {
-        console.log ('linker error: object line has invalid format: ' + s);
+        console.log ('linker error: object line has invalid format: ' + xs);
     }
         return {operation, operands}
 }
@@ -199,7 +332,7 @@ function mkObjStmt (i,srcLine,operation,operands) {
         objLocation : 0,
         objSize : 0,
         objOperandNames : [],
-        objCode : []
+        objLine : []
     }
 }
 
@@ -307,7 +440,7 @@ function parseCopyObjectModuleToMemory (es) {
 //    console.log('field1 = ' + fields[1]);
     //    console.log('field2 = ' + fields[2]);
     bootCurrentLocation = 0;
-    for (var i = 0; i < xs.length; i++) {
+    for (let i = 0; i < xs.length; i++) {
 	linkerBootLine(es, i, xs[i]);
 //	experiment(xs[i]);
     }
@@ -328,3 +461,12 @@ function linkerBootLine (es,m,i,x) {
     bootCurrentLocation++;
 }
 
+// Prepare assembly liating when executable is booted
+function initListing (m,es) {
+    es.curInstrAddr = 0;
+    es.curInstrLineNo = -1;  // -1 indicates no line has been highlighted
+    es.nextInstrAddr = 0;
+    es.nextInstrLineNo = es.curAsmap[0];
+    highlightListingLine (es, es.nextInstrLineNo, "NEXT");
+    setProcAsmListing (es,m);
+}

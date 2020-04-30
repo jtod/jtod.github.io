@@ -1,5 +1,5 @@
 // Sigma16: emulator.js
-// Copyright (C) 2019, 2020 John T. O'Donnell
+// Copyright (C) 2020 John T. O'Donnell
 // email: john.t.odonnell9@gmail.com
 // License: GNU GPL Version 3 or later. See Sigma16/README.md, LICENSE.txt
 
@@ -14,11 +14,16 @@
 // a copy of the GNU General Public License along with Sigma16.  If
 // not, see <https://www.gnu.org/licenses/>.
 
-//-------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // emulator.js interprets machine language programs and displays
 // effects in the gui.
+//-----------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------
+"use strict";
+
+//-----------------------------------------------------------------------------
+// Interrupts
+//-----------------------------------------------------------------------------
 
 function timerInterrupt() {
     console.log ("Timer Interrupt clicked");
@@ -145,14 +150,6 @@ function showEffect (es,i) {
 //   if i=null then no source is avaiable
 //     else currentModule.asmStmt[i].srcLine
 
-function initListing (m,es) {
-    es.curInstrAddr = 0;
-    es.curInstrLineNo = -1;  // -1 indicates no line has been highlighted
-    es.nextInstrAddr = 0;
-    es.nextInstrLineNo = es.curAsmap[0];
-    highlightListingLine (es, es.nextInstrLineNo, "NEXT");
-    setProcAsmListing (es,m);
-}
 
 function showListingParameters (es) {
     console.log ('showListingParameters'
@@ -286,17 +283,9 @@ function procReset(es) {
 // Controlling instruction execution
 //------------------------------------------------------------------------------
 
-function procPause(es) {
-    console.log ("procPause");
-    setProcStatus (es,Paused);
-    refreshRegisters();
-    regShowAccesses();
-    memRefresh();
-    memShowAccesses ();
-    memDisplayFull();
-    showInstrDecode (es);
-    highlightListingAfterInstr (es);
-}
+// Run instructions repeatedly until a stopping condition arises.
+// Yield control each iteration to avoid blocking the user interface,
+// particularly the manual timer interrupt button.
 
 function instructionLooper (es) {
     if (es.procStatus===Ready) {
@@ -316,6 +305,20 @@ function instructionLooper (es) {
         }
     }
     console.log ('instructionLooper terminated');
+}
+
+// The Pause button stops the instruction looper and displays the state.
+
+function procPause(es) {
+    console.log ("procPause");
+    setProcStatus (es,Paused);
+    refreshRegisters();
+    regShowAccesses();
+    memRefresh();
+    memShowAccesses ();
+    memDisplayFull();
+    showInstrDecode (es);
+    highlightListingAfterInstr (es);
 }
 
 //---------------------------------------------------------------------------
@@ -652,7 +655,7 @@ const op_trap = (es) => {
     } else if (code==2) { // Write
         trapWrite(es);
     } else { // Undefined trap is nop
-        console.log (`trap with undefined code=${code}`)
+        console.log (`trap with unbound code = ${code}`)
     }
 }
 
@@ -907,11 +910,11 @@ function exp2_getctl (es) {
     regFile[es.field_e].put(register[cregidx].get());
 }
 function exp2_putctl (es) {
-    console.log ('exp2_putctl');
+    console.log ('putctl');
     let cregn = es.field_f;
     let cregidx = cregn + ctlRegIndexOffset; // init in gui.js
-    console.log (`exp_getctl cregn=${cregn} cregidx=${cregidx}`);
-    console.log (`es.ir_d=${es.ir_d}`);
+    console.log (`putctl src e==${es.field_e} val=${regFile[es.field_e].get()}`);
+    console.log (`putctl dest f=${es.field_f} cregn=${cregn} cregidx=${cregidx}`);
     register[cregidx].put(regFile[es.field_e].get());
     register[cregidx].refresh();
 }

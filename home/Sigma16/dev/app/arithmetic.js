@@ -1,5 +1,5 @@
 // Sigma16: arithmetic.js
-// Copyright (C) 2019, 2020 John T. O'Donnell
+// Copyright (C) 2020 John T. O'Donnell
 // email: john.t.odonnell9@gmail.com
 // License: GNU GPL Version 3 or later. See Sigma16/README.md, LICENSE.txt
 
@@ -20,6 +20,8 @@
 // conversions, and bit manipulation, operations on fields, and
 // arithmetic as required by the instruction set architecture.
 //------------------------------------------------------------------------------
+
+"use strict";
 
 //------------------------------------------------------------------------------
 // Bit manipulation - big endian
@@ -70,7 +72,7 @@ function extractBool (x,i) {
 
 // Check where this is used ??????????????
 
-var intToBit = function (x) {
+let intToBit = function (x) {
     if (x < 0 || x > 1)
     {console.log('intToBit invalid int: ' + x);
      return('#');
@@ -269,17 +271,6 @@ function intToWord (x) {
     return y < 0 ? y + const10000 : y;
 }
 
-// ??????????? deprecated
-/*
-function intToTc (x) {                  now use wordToInt
-    if (0 <= x && x < 32768) {
-	return x
-    } else if (-32768 <= x & x < 0) {
-	return wordInvert(x) + 1
-    } else { return NAN }
-}
-*/
-
 // Show a word in hex, binary, and two's complement
 
 function showWord (w) {
@@ -333,7 +324,7 @@ const hexDigit =
 
 // Return a string giving the hex representation of a word
 
-var wordToHex4 = function (x) {
+let wordToHex4 = function (x) {
     let [p,q,r,s] = splitWord (x);
     return hexDigit[p] + hexDigit[q] + hexDigit[r] + hexDigit[s];
 }
@@ -642,25 +633,4 @@ function showCC (c) {
 	+ (extractBool (c,bit_ccE) ? '=' : '')
 	+ (extractBool (c,bit_ccg) ? '>' : '')
 	+ (extractBool (c,bit_ccG) ? 'G' : '') ;
-}
-
-//------------------------------------------------------------------------------
-// Experiments.... deprecated
-
-// experiment, try a function defined in main.  The idea is that a
-// function might be defined in main for the electron standalone
-// version, but there could be a fall back definition in the browser
-// version
-
-// result of clicking Editor: try def in main
-//   in browser: tryMainFcn NO
-//   in electron standalone app:  
-
-function tryMainFcn () {
-    if (typeof testDefInMain === 'function') {
-	document.getElementById('EditorTextArea').value =
-	    "tryMainFcn: testDefInMain exists " + testDefInMain (41);
-    } else {
-	document.getElementById('EditorTextArea').value = "tryMainFcn NO";
-    }
 }

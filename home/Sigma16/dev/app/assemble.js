@@ -14,24 +14,54 @@
 // a copy of the GNU General Public License along with Sigma16.  If
 // not, see <https://www.gnu.org/licenses/>.
 
-//-------------------------------------------------------------------------------
-// assemble.js is a command line main program that assembles a Sigma16
-// source file.  Requires that node.js is installed: open a shell,
-// then node --version
+"use strict";
+
+const assembler = require("./assembler");
+const mod = require ("./module");
+const fs = require ("fs");
+
+let m;    // holds module data structure
+let src;  // holds source code
+
+//-----------------------------------------------------------------------------
+// assemble.js is a command line interface to the assembler
+//-----------------------------------------------------------------------------
 
 // Usage: node assemble.js myprog
 //   Reads source from myprog.asm.txt
 //   Writes object code to myprog.obj.txt
 //   Writes metadata to myprog.md.txt
+//   Writes listing to standard output (or myprog.lst.txt?)
 
-// It may be helpful to define:  alias assemble="node assemble.js"
+// It may be helpful to make some definitions.
+
+// Example: cygwin bash on Windows.  Copy the following lines into
+// your ~/.bashrc file.  Edit the fist line, defining SIGMA16, to give
+// the location where you copied the Sigma16 folder.
+
+//   # Sigma16: define aliases for commands
+//   SIGMA16=/path/to/myinstallation/Sigma16
+//   export SIGMA16
+//   alias assemble="node ${SIGMA16}/app/assemble.js"
+
+// ------------
+// Testing import
+
+
+// foobar.sayfoobar ("calling the module foobar");
+//foobar.sayfoobar ("calling the module foobar");
+// foobar.sayfoobar ("calling the module foobar");
+// foobar.sayfoobar ("calling the module foobar");
+
+// let m = mkModuleAsm ();
+
 
 //-------------------------------------------------------------------------------
 
 // Modules to control application life and create native browser window
 // const path = require('path')
 
-const fs = require ("fs");
+
 main ();
 
 // Command line args:
@@ -40,30 +70,47 @@ main ();
 //   argv[2] = Sigma16 module file basename
 
 function main () {
-    console.log ("assemble");
-    console.log (process.argv); // display command line arguments
-    let sourcefile = `${process.argv[2]}.asm.txt`;
-    let objfile = `${process.argv[2]}.obj.txt`;
-    console.log (`input file = ${sourcefile}`);
-    console.log (`output file = ${objfile}`);
-    try {
-        const data = fs.readFileSync(sourcefile, 'utf8')
-        runAssembler(sourcefile,objfile,data);
-    } catch (err) {
-        console.error(`Cannot read file ${sourcefile}`);
+    // argv[0] = node exe
+    // argv[1] = this program
+    // argv[2] = first command line argument = file base name
+    if (process.argv.length !== 3) {
+        console.log ("usage: node assemble.js filebasename");
+    } else {
+        let baseName = process.argv[2];
+        console.log (`assemble: base name = ${baseName}`);
+        let srcFile = `${baseName}.asm.txt`;
+        let objFile = `${baseName}.obj.txt`;
+        let lstFile = `${baseName}.lst.txt`;
+        let mdFile = `${baseName}.md.txt`;
+        console.log (`source file = ${srcFile}`);
+        console.log (`object file = ${objFile}`);
+        console.log (`listing file = ${lstFile}`);
+        console.log (`metadata file = ${mdFile}`);
+        src = "";
+        try {
+            src = fs.readFileSync(srcFile, 'utf8')
+        } catch (err) {
+            console.error(`Cannot read file ${srcFile}`);
+        }
+        console.log ("Starting assembler");
+        run (src, objFile, lstFile, mdFile);
+        console.log ("Finished");
     }
 }
 
-function runAssembler (sourcefile,objfile,src) {
+function run (src, objFile, lstFile, mdFile) {
+    console.log ("run");
     console.log (src);
-    let objtext = "bye bye";
-    console.log ("assemble finished");
-    writeObject (objfile,objtext);
+    m = assembler.mkModuleAsm ();
+    assembler.runAssembler ();
+//    let objtext = "dummy object code";
+//    writeObject (objFile, objtext);
+    console.log ("run finished");
 }
 
-function writeObject (fname,obj) {
+function writeObject (fname, obj) {
     try {
-        const file = fs.writeFileSync(fname,obj);
+        const file = fs.writeFileSync(fname, obj);
     } catch (err) {
         // console.error(err)
         console.error(`Unable to write object code to ${fname}`);

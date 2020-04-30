@@ -1,6 +1,6 @@
 <!--
 Sigma16: Sigma16.html
-Copyright (C) 2019, 2020 John T. O'Donnell
+Copyright (C) 2020 John T. O'Donnell
 email: john.t.odonnell9@gmail.com
 License: GNU GPL Version 3 or later. See Sigma16/README.md, LICENSE.txt
 
@@ -8,17 +8,17 @@ This file is part of Sigma16.  Sigma16 is free software: you can
 redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation, either
 version 3 of the License, or (at your option) any later version.
-Sigma16 is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.  You should have received
-a copy of the GNU General Public License along with Sigma16.  If
-not, see <https://www.gnu.org/licenses/>.
+Sigma16 is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.  You should have received a copy of the GNU General
+Public License along with Sigma16.  If not, see
+<https://www.gnu.org/licenses/>.
 
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 Sigma16.html is the top level html file; the system is launched by
 visiting this file in a browser.
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 -->
 
 <!doctype html>
@@ -31,7 +31,10 @@ visiting this file in a browser.
 				   computer architecture, assembler,
 				   emulator, application">
     <title>Sigma16</title>
+    <script type="module" src="./testmod1.mjs"> </script>
+    <script type="module" src="./testmod2.mjs"> </script>
     <script src="./version.js"> </script>
+    <script src="./common.js"> </script>
     <script src="./arithmetic.js"> </script>
     <script src="./architecture.js"> </script>
     <script src="./state.js"> </script>
@@ -176,8 +179,9 @@ visiting this file in a browser.
 	    <div class="Pane" id="AssemblerPane">
 	      <div class="PaneButtons">
 		<button onclick="assembler();">Assemble</button>
-		<button onclick="setAsmListing();">Assembly listing</button>
-		<button onclick="setObjectListing();">Object listing</button>
+		<button onclick="setObjectListing();">Show object</button>
+		<button onclick="setAsmListing();">Show listing</button>
+		<button onclick="setMetadata();">Show metadata</button>
 	      </div>
 	      <div class="HighlightedTextAsHtml" id="AssemblerBody">
 		<div id="AsmTextHtml"></div>
@@ -186,12 +190,12 @@ visiting this file in a browser.
 
 	    <div class="Pane" id="LinkerPane">
 	      <div class="PaneButtons">
-                <button onclick="showLinkerStatus()">Status</button>
-                <button onclick="linkShowSelectedObj()">Selected module</button>
-                <button onclick="readObject()">Read object from editor</button>
-		<button onclick="setLinkerModules()"> Set modules </button>
-		<button onclick="link()"> Link </button>
-		<button onclick="boot(emulatorState)"> Boot </button>
+                <button onclick="linkShowSelectedObj()">Show object</button>
+                <button onclick="readObjectFromEditor()">Read object</button>
+		<button onclick="setLinkerModules()">Read modules</button>
+		<button onclick="link()">Link</button>
+		<button onclick="boot(emulatorState)">Boot</button>
+                <button onclick="linkShowMetadata()">Show metadata</button>
 	      </div>
 	      <div class="PaneBody" id="LinkerBody">
 	      <div class="HighlightedTextAsHtml" id="LinkerBody">

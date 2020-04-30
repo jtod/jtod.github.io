@@ -2,7 +2,7 @@
 
 <!--
 Sigma16: userguide.md
-Copyright (C) 2019, 2020 John T. O'Donnell
+Copyright (C) 2020 John T. O'Donnell
 email: john.t.odonnell9@gmail.com
 License: GNU GPL Version 3 or later. See Sigma16/README.md, LICENSE.txt
 
@@ -3563,26 +3563,49 @@ This shows each identifier (or "symbol") that appears in the program,
 the address allocated for the symbol, the source code line where it
 was defined, and the source code lines where it was used.
 
-# Linker
+# Modules, linking, and booting
 
-The assembler inputs a program in assembly language and it outputs an
-*object module*.  The object module contains the machine language code
-as well as some additional metadata.  The metadata enables the linker
-to combine the object module with other modules into an *executable
-module*.
+Small programs often consist of just one module (or file).  The
+assembler translates the assembly language source code into machine
+language which is then executed by the processor.
+
+However, there are several reasons for breaking up larger programs
+into several modules.  It's easier to work with several modules of
+reasonable size rather than one gigantic file.  A module may provide
+generic services that can be incorporated into many programs.
+Programs can be simplified if they use libraries for common tasks,
+rather than implementing everything from scratch.  It is faster to
+assemble small files than large ones.
+
+When a program consists of several modules, each one has to be
+assembled separately.  However, the resulting machine language is not
+executable if it refers to procedures or other values defined in
+another module.  Therefore the modules need to be combined into a
+single executable module; this is called *linking*.
+
+Sigma16 supports linking, but
+
+The system supports programs that consist of several modules.  It also
+makes it easy to run programs consisting of just one standalone
+module.  This is done simply and intuitively, so you can ignore the
+issues of modules and linking if you just want to write a andalone
+program.
+
+
+## Programs, modules, and files
+
+The assembler inputs a program in assembly language.  Its primary
+output is an *object module* which contains the machine language code.
+The assembler also produces an *assembly listing*, which presents the
+program in a form useful for the programmer, and a *metadata module*
+which enables the emulator to track the source statement corresponding
+to each instruction.
 
 Each module has an associated object code, which may be empty. The
 object code can be produced by a successful assembly (i.e. an assembly
 with no errors) or it can be obtained from the Editor.  This allows
 object code to be read from a file or entered directly by the user.
 
-## Programs, modules, and files
-
-The system is designed to allow programs that consist of several
-modules, but also to allow programs consisting of one standalone
-module.  In addition, an aim is to do this simply and intuitively, so
-that you can ignore the issues of modules and linking if you just want
-to write a andalone program.
 
 There is a standard convention for file names.  If, for example, you
 have a program named MyProgram, then the files associated with it
@@ -3722,13 +3745,20 @@ each token is either a hex constant or an identifier.
   of letters, digits, and underscore characters, beginning with a
   letter.
 
-The object language has six statements: module, org, data, import,
+The object language has seven statements: module, org, data, import,
 export, and relocate.  Some of these are related to corresponding
 statements in assembly language, but their syntax is different and in
 some cases they may contain different information.
 
+### module statement
 
+### org  statement
 
+### data statement
+
+### import statement
+
+### export statement
 
 ### relocate statement
 
@@ -3740,6 +3770,20 @@ the linker will set mem[x+y] = obj[x]+y.
 ~~~~
 relocate hex4,hex4,...
 ~~~~
+
+### Module metadata
+
+The emulator attempts to show the assembly language source as the
+program runs, and it highlights the current and next instruction.  To
+do this, the emulator needs to have some information that isn't
+present in the object code.  This extra information is supplied in a
+separate file called *module metadata* produced by the assembler.
+
+The user can ignore the metadata.  However, you can look at it if
+you're curious.  The metadata contains the source code in two forms:
+plain text and with html tags for highlighting the fields.  In
+addition, the metadata contains a mapping from address to source code
+line number.
 
 ## Executable code
 
@@ -3997,6 +4041,69 @@ Sigma16/circuits/M1
 Sigma16/circuits/M1/programs
 ~~~~
 
+# Installation
+
+## The easy way: running in browser with no installation
+
+To run the main app (the Integrated Development Environment, or IDE)
+visit the [Sigma16 home page](https://jtod.github.io/home/Sigma16/) in
+your browser and click on the link to launch the app.  It will run in
+your browser; you don't have to install anything.
+
+The Home page also contains links to the source code, related
+documents, and further information about the project.  Its a good idea
+to bookmark the Home Page, rather than a specific release: that way
+you'll always get the latest version.
+
+The IDE runs in a web browser.  The browser needs to be up to date;
+the app won't work in very old versions of browsers.  It should work
+with any browser that is compliant with the current ECMAScript
+standard.  Just keep your browser updated (you need to do that anyway)
+and it should work.
+
+## Command line tools
+
+In addition to the graphical user interface, there are a number of
+tools that run in a command line.  These tools don't use a GUI
+(graphical user environment).  They include a fast emulator and
+circuit simulator.
+
+### Required software
+
+To use the full set of command line tools, you need the following:
+
+* Console running a shell.  The most common choice is bash, which runs
+  on all platforms.
+
+* node.js and npm.  These are part of the standard JavaScript tools
+  which can be downloaded from
+  [https://www.npmjs.com/get-npm](https://www.npmjs.com/get-npm).
+
+* C. Many systems come with a C compiler already installed.  The gcc
+  compiler is available at
+  [https://gcc.gnu.org/install/](https://gcc.gnu.org/install/)
+
+* ghc.  The circuit tools requires the Haskell compiler; download from
+  [https://www.haskell.org/downloads/](https://www.haskell.org/downloads/)
+
+### Setting up your environment
+
+Shell running bash
+
+Add the following to your .bashrc
+file, but replace /Users//yourlogin/Documents/path/to/ with your own file
+location.  In a bash shell running on cygwin, try /Users/yourlogin.
+
+~~~~
+SIGMA16=/Users/yourlogin/Documents/path/to/SigmaProject/Sigma16
+export SIGMA16
+alias helloworld="node ${SIGMA16}/app/helloworld.js"
+~~~~
+
+
+### Running the circuit
+
+
 Create a file named .ghci containing the following
 The simplest way to run the simulations is as follows.
 
@@ -4034,30 +4141,38 @@ similar to this:
 :set -i/c/Users/a/b/c/Hydra/src/haskell/
 ~~~~
 
-# Installation
+### Running IDE locally
 
-The application currently works with Chrome and Firefox, and
-possible Edge.
+### Run with npm
 
-The software is available on the Internet at the [Sigma16 home
-page](https://jtod.github.io/home/Sigma16/), which contains a link to
-the latest version, some previous versions, related documents, and
-more information about the project.
+See app/makefile for notes on how to run the software as a standalone
+program, without using a browser.  The following software needs to be
+installed in order to build the executable using electron
 
-## How to run Sigma16
+    node.js
+    npm
 
-There are a number of ways to run the software, but it's recommended
-that you try the easiest way.
+### Compile using npm
 
-### The easiest way: just click a link
 
-Run the app with two clicks:
+Clone this repository
+~~~~
+git clone https://github.com/electron/electron-quick-start
+~~~~
 
-  1. Visit the [Sigma16 homepage](https://jtod.github.io/home/Sigma16/)
-  2. Click on *Launch the latest release*
 
-This will run the app in your browser, and you don't need to download
-or install anything.  For most users this is the recommended method.
+~~~~
+cd electron-quick-start  # Go to the repository
+npm install              # Install dependencies
+npm start                # Run the app
+~~~~
+
+Now you can launch the app from the command line:
+
+~~~~
+npm start                # Run the app
+~~~~
+
 
 ### Download and open file in browser
 
@@ -4112,7 +4227,7 @@ straightforward to build Sigma16 on your computer:
     enhanced file access, as well as a few other minor enhancements,
     and you don't need Internet access.
 
-### Compiling a standalone executable
+### Compiling IDE for local execution
 
 First install npm, which also gives you Node.js.  Use npm to install
 electron.
@@ -4174,23 +4289,15 @@ specific tools is needed:
 
 Trying electron-builder
 
-    npm install electron-builder --save-dev   in src/app
-    npm run mkdist
-	
-**Version number**
+~~~~
+npm install electron-builder --save-dev   in src/app
+npm run mkdist
+~~~~
 
-The version number is needed in several places.  To keep it
-consistent, there is only one primary place where it should be
-specified manually: in the version property in app/package.json.
+# Implementation notes
 
-The makefile extracts the version number from that file, and (1)
-defines a make variable; (2) writes the Sigma16/VERSION file with just
-the version number, and (3) writes Sigma16/app/version.js which is
-just defines the version number as a global constant.  
+This program is experimental software and is under development.
 
-# About Sigma16
-
-This program is experimental software, and is under development.
 Sigma16 consists of several components:
 
 * The Integrated Development Environment (IDE) is written in
@@ -4205,15 +4312,40 @@ Sigma16 consists of several components:
 * The User Guide is written in markdown and prepared for a web browser
   using pandoc.
 
-## Author
+## makefile
+
+## Version number
+
+The version number is needed in several places.  To keep it
+consistent, there is only one primary place where it should be
+specified manually: in the version property in app/package.json.
+
+The makefile extracts the version number from that file, and (1)
+defines a make variable; (2) writes the Sigma16/VERSION file with just
+the version number, and (3) writes Sigma16/app/version.js which is
+just defines the version number as a global constant.  
+
+## Running with npm
+
+The following files are required for compilation with npm, but they
+are not needed just to run the source program in a browser.
+
+~~~~
+src/main.js
+src/package.json
+src/package-lock.json
+src/preload.js
+src/renderer.hs
+src/node_modules/
+~~~~
+
+# Copyright and license
 
 The architecture, software tools, and documentation were designed,
 implemented, and written by John O'Donnell.  Contact email:
 john.t.odonnell9@gmail.com
 
-## License
-
-Copyright (c) 2019-2020 John T. O'Donnell
+Copyright (c) 2020 John T. O'Donnell
 
 License: GNU GPL Version 3 or later.
 
