@@ -1,0 +1,37 @@
+asmap 9
+8,8,9,10,10,11,11,12,14
+source 17
+<span class='ListingHeader'>Line Addr Code Code Source</span>
+<span class='ListingHeader'>Line Addr Code Code Source</span>
+   1 0000           ; Mod1 - main program, part of a test for modules and linking
+   1 0000           <span class='FIELDLABEL'></span><span class='FIELDOPERATION'></span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'>; Mod1 - main program, part of a test for modules and linking</span>
+   2 0000           ; This file is part of Sigma16, see Sigma16/README.md
+   2 0000           <span class='FIELDLABEL'></span><span class='FIELDOPERATION'></span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'>; This file is part of Sigma16, see Sigma16/README.md</span>
+   3 0000           ; imports Mod2
+   3 0000           <span class='FIELDLABEL'></span><span class='FIELDOPERATION'></span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'>; imports Mod2</span>
+   4 0000           
+   4 0000           <span class='FIELDLABEL'></span><span class='FIELDOPERATION'></span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'></span>
+   5 0000           Mod1    module
+   5 0000           <span class='FIELDLABEL'>Mod1</span>    <span class='FIELDOPERATION'>module</span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'></span>
+   6 0000           f       import Mod2,fcn   ; renaming Mod2.fcn to f
+   6 0000           <span class='FIELDLABEL'>f</span>       <span class='FIELDOPERATION'>import</span> <span class='FIELDOPERAND'>Mod2,fcn</span><span class='FIELDCOMMENT'>   ; renaming Mod2.fcn to f</span>
+   7 0000           x       import Mod2,x     ; Mod2.x can be referred to as x
+   7 0000           <span class='FIELDLABEL'>x</span>       <span class='FIELDOPERATION'>import</span> <span class='FIELDOPERAND'>Mod2,x</span><span class='FIELDCOMMENT'>     ; Mod2.x can be referred to as x</span>
+   8 0000           
+   8 0000           <span class='FIELDLABEL'></span><span class='FIELDOPERATION'></span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'></span>
+   9 0000 f101 0000         load   R1,x[R0]
+   9 0000 f101 0000 <span class='FIELDLABEL'></span>        <span class='FIELDOPERATION'>load</span>   <span class='FIELDOPERAND'>R1,x[R0]</span><span class='FIELDCOMMENT'></span>
+  10 0002 0567              add    R5,R6,R7
+  10 0002 0567      <span class='FIELDLABEL'></span>        <span class='FIELDOPERATION'>add</span>    <span class='FIELDOPERAND'>R5,R6,R7</span><span class='FIELDCOMMENT'></span>
+  11 0003 fd08 0000         jal    R13,f[R0]
+  11 0003 fd08 0000 <span class='FIELDLABEL'></span>        <span class='FIELDOPERATION'>jal</span>    <span class='FIELDOPERAND'>R13,f[R0]</span><span class='FIELDCOMMENT'></span>
+  12 0005 f102 0008         store  R1,result[R0]
+  12 0005 f102 0008 <span class='FIELDLABEL'></span>        <span class='FIELDOPERATION'>store</span>  <span class='FIELDOPERAND'>R1,result[R0]</span><span class='FIELDCOMMENT'></span>
+  13 0007 d000              trap   R0,R0,R0
+  13 0007 d000      <span class='FIELDLABEL'></span>        <span class='FIELDOPERATION'>trap</span>   <span class='FIELDOPERAND'>R0,R0,R0</span><span class='FIELDCOMMENT'></span>
+  14 0008           
+  14 0008           <span class='FIELDLABEL'></span><span class='FIELDOPERATION'></span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'></span>
+  15 0008 0000      result  data   0
+  15 0008 0000      <span class='FIELDLABEL'>result</span>  <span class='FIELDOPERATION'>data</span>   <span class='FIELDOPERAND'>0</span><span class='FIELDCOMMENT'></span>
+  16 0009           
+  16 0009           <span class='FIELDLABEL'></span><span class='FIELDOPERATION'></span><span class='FIELDOPERAND'></span><span class='FIELDCOMMENT'></span>

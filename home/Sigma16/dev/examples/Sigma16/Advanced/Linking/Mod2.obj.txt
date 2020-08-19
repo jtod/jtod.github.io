@@ -1,0 +1,4 @@
+module   Mod2
+data     0111,f0d3,0000,0004
+export   fcn,0000,relocatable
+export   x,0003,relocatable

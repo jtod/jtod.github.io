@@ -149,11 +149,13 @@ A:hover   { background-color: #e0e0ff; text-decoration: none }
   padding: 0em;
   }
 
+/*
+*/
 table {
-    table-layout: fixed;
     width: 90%;
     margin-left: 5%;
     margin-right: 5%;
+    table-layout: auto;
     margin-top: 1em;
     margin-bottom: 1em;
     border: 1px solid black;
@@ -163,19 +165,29 @@ table {
 th {
     border: 1px solid black;
     border-collapse: collapse;
+    text-align: center;
     font-weight: bold;
     padding: 2px;
 }
 
-td {
+tr {
     border: 1px solid black;
-    border-collapse: collapse;
-    padding: 6px;
-    text-align: center;
-    border-collapse: collapse;
+    border-collapse: separate;
 }
 
-table.wordlayout, th, td {
+td {
+    border: 1px solid black;
+    text-align: left;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+}
+
+/*
+    border-style: none;
+table.wordlayout {
     table-layout: fixed;
 
     width: 90%;
@@ -187,6 +199,7 @@ table.wordlayout, th, td {
     border: 1px solid black;
     border-collapse: collapse;
 }
+*/
 
 .box-around-text {
     border: 1px solid black;

@@ -1,0 +1,4 @@
+module   Mod1
+data     f101,0000,0567,fd08,0000,f102,0008,d000,0000
+import   f,Mod2,fcn
+import   x,Mod2,x
