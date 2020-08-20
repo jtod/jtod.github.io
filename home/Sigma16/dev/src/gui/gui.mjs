@@ -186,6 +186,8 @@ worker.addEventListener("message", e => {
 });
 worker.postMessage({type: "init", sharedArray});
 
+
+
 function formatArray(array) {
     return Array.from(
         array,
@@ -194,6 +196,7 @@ function formatArray(array) {
 }
 
 // end basic-SharedArrayBuffer-main.js
+
 // ----------------------------------------------------------------------
 
 function makeTextFile (text) {
@@ -665,13 +668,7 @@ function enableDevTools () {
 //    document.getElementById("DevTools_Pane_Button").style.display = "block";
 }
 
-// enter enabldev() in console to use dev tools
-
-window.enabledev = enableDevTools;
-
-
-// window.showDevToolsButton = showDevToolsButton;
-// window.hideDevToolsButton = hideDevToolsButton;
+window.enableDevTools = enableDevTools;
 
 /* experiment
 let myWorker;

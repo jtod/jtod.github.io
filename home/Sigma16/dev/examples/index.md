@@ -1,9 +1,9 @@
 # Example programs
 
-* [Core](Core/index.html) Simple programs using the core architecture
+* [Core](Sigma16/Core/index.html) Simple programs using the core architecture
 
-* [Advanced](Advanced/index.html) More complex programs using the full
+* [Advanced](Sigma16/Advanced/index.html) More complex programs using the full
   architecture
   
-* [SysLib](SysLib/index.html) Library functions that can be linked with
+* [SysLib](Sigma16/SysLib/index.html) Library functions that can be linked with
   your programs
