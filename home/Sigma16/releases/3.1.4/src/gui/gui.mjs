@@ -29,7 +29,6 @@ import * as ed    from './editor.mjs';
 import * as asm   from '../base/assembler.mjs';
 import * as link  from '../base/linker.mjs';
 import * as em    from '../base/emulator.mjs';
-import * as gt    from "./guitools.mjs";
 
 export const procAsmListingElt = document.getElementById('ProcAsmListing');
 
