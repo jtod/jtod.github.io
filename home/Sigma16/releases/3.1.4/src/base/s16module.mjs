@@ -1,5 +1,5 @@
 // Sigma16: module.mjs
-// Copyright (C) 2020 John T. O'Donnell
+// Copyright (C) 2021 John T. O'Donnell
 // email: john.t.odonnell9@gmail.com
 // License: GNU GPL Version 3 or later. See Sigma16/README.md, LICENSE.txt
 
@@ -83,25 +83,6 @@ function handleClose (bn) {
     refreshModulesList ();
 }
 
-// Temporary testing code
-
-/* deprecated
-export function test() {
-    console.log ("smod.test");
-    refreshModulesList ();
-
-    console.log ("Summary of selected module");
-    let m = st.env.getSelectedModule ();
-    console.log (m.showShort());
-    
-    com.modalWarning ("This is a\nmodal warning!");
-    console.log (`modules:`);
-    for (const k of st.env.modules.keys()) {
-        console.log (`key = ${k}`);
-    }
-}
-*/
-
 //------------------------------------------------------------------------------
 // Representation of a module
 //------------------------------------------------------------------------------
@@ -127,7 +108,6 @@ export function initModules () {
     com.mode.trace = true;
     com.mode.devlog ("initModules");
     st.env.clearModules ();
-//    refreshEditorBuffer();  only do this when entering editor
     refreshModulesList();
 }
 
@@ -138,16 +118,15 @@ export function initModules () {
 // Make new module, copy example text into it, and select it
 
 export function selectExample() {
-    com.mode.devlog ('selectExample');
     let exElt = document.getElementById('ExamplesIframeId');
     let xs = exElt.contentWindow.document.body.innerHTML;
-    com.mode.devlog (`xs = ${xs}`);
+    com.mode.devlog (`smod.selectExample raw xs = ${xs}`);
     let skipPreOpen = xs.replace(com.openingPreTag,"");
     let skipPreClose = skipPreOpen.replace(com.closingPreTag,"");
     com.mode.devlog (`skipPreOpen = ${skipPreOpen}`);
     let ys = skipPreClose;
-    let m = new st.S16Module ();
-    m.modText = ys;
+    let m = new st.S16Module ("Example");
+    m.asmEdText = ys;
     refreshEditorBuffer();
     refreshModulesList();
 }
@@ -166,14 +145,12 @@ export function selectExample() {
 // FileInput element.
 
 export function prepareChooseFiles () {
-    com.mode.devlog ("prepareChooseFiles");
-    let elt = document.getElementById('FileInput');
-    elt.addEventListener('change', event => {
-        com.mode.devlog ("prepareChooseFiles change listener invoked");
-        handleSelectedFiles(elt.files);
-    });
+    com.mode.devlog ("prepareChooseFiles")
+    let elt = document.getElementById('FileInput')
+    elt.addEventListener ('change', event => {
+        handleSelectedFiles (elt.files)
+    })
 }
-
 
 // Parse string xs and check that it's in the form basename.ftype.txt
 // where basename is any string not containing "." and ftype is one of
@@ -220,8 +197,9 @@ export function checkFileName (xs) {
 let newFiles = [];
 
 export function handleSelectedFiles (flist) {
-    com.mode.trace = true;
-    com.mode.devlog (`*********** handleSelectedFiles: ${flist.length} files`);
+//    com.mode.trace = true;
+    com.mode.devlog (`*** handleSelectedFiles: ${flist.length} files`);
+    console.log (`*** handleSelectedFiles: ${flist.length} files`);
     newFiles = [];
     for (let f of flist) {
         const {errors, baseName, stage} = checkFileName (f.name);
@@ -256,9 +234,25 @@ function mkFileReader (fileRecord) {
     com.mode.trace = true;
     fr.onload = function (e) {
 	com.mode.devlog (`File reader ${fileRecord.fileName} onload`);
+	console.log (`File reader ${fileRecord.fileName} onload`);
         fileRecord.text = e.target.result;
-        console.log (`file onload bn=${fileRecord.baseName} fileName=${fileRecord.fileName} text=${fileRecord.text}`);
+        console.log (`file onload bn=${fileRecord.baseName} `
+                     + `fileName=${fileRecord.fileName} text=${fileRecord.text}`);
         fileRecord.fileReadComplete = true;
+        let m = st.env.mkSelectModule (fileRecord.baseName)
+        switch (fileRecord.stage) {
+        case st.StageAsm: m.asmEdText = fileRecord.text
+            console.log (`set asmEdText = ${m.asmEdText}`)
+            break
+        case st.StageObj: m.objEdText = fileRecord.text
+            break
+        case st.StageLnk: m.lnkEdText = fileRecord.text
+            break
+        case st.StageExe: m.exeEdText = fileRecord.text
+            break
+        default:
+            console.log ("*** Error file read, unknown stage")
+        }
         refreshWhenReadsFinished ();
     }
     fr.onerror = function (e) {
@@ -285,6 +279,8 @@ function refreshWhenReadsFinished  () {
         if (allOK) {
             com.mode.devlog (`check finished calling refresh`);
             refreshModulesList(); // do after all files are in
+            let elt = document.getElementById('FileInput');
+            elt.value = "" // clear file name(s) to allow re-reading same file(s)
         } else {
             com.mode.devlog (`mkOfReader onload NOT calling refresh`);
         }

@@ -65,7 +65,8 @@ visiting this file in a browser.
 	<button id="Assembler_Pane_Button"> Assembler </button>
 	<button id="Linker_Pane_Button"> Linker </button>
 	<button id="Processor_Pane_Button"> Processor </button>
-	<button id="About_Button"> About Sigma16 </button>
+	<button id="Options_Pane_Button"> Options </button>
+	<button id="About_Button"> About </button>
 	<button class="RightButton" id="UG_Resize_Right_Large_Button">
           &#x27f9;
         </button>
@@ -86,10 +87,13 @@ visiting this file in a browser.
 
 	    <div class="Pane" id="WelcomePane">
 	      <div class="PaneButtons">
-		<button id="WP_Guide_Top"> Contents </button>
+<!--
+		<button id="WP_Guide_Top"> Top </button>
+-->
+		<button id="WP_TOC"> Contents </button>
 		<button id="WP_Tutorials"> Tutorials </button>
 		<button id="WP_Architecture"> Architecture </button>
-		<button id="WP_ISA"> Instruction set </button>
+		<button id="WP_ISA"> Instructions </button>
 		<button id="WP_Assembly_Language"> Assembly language </button>
 		<button id="WP_Linker"> Linker </button>
 		<button id="WP_Programming"> Programming </button>
@@ -138,17 +142,19 @@ visiting this file in a browser.
 		<button id="EDP_Clear"> Clear </button>
 		<button id="EDP_Revert"> Revert </button>
 		<button id="EDP_New"> New </button>
-		<button id="EDP_Asm"> Asm </button>
-		<button id="EDP_Obj"> Obj </button>
-		<button id="EDP_Exe"> Exe </button>
-		<button id="EDP_Link"> Link </button>
-		<button id="EDP_Hello_world"> Hello, world! </button>
-		<button id="EDP_Test"> Test </button>
                 <button id="EDP_Save"> Save </button>
 		<a download="S16DownloadFile.txt"
 		   id="editorDownloadAnchor"
 		   style="display: none">
 		</a>
+		<button id="EDP_Hello_world"> Hello, world! </button>
+                <!--
+		<button id="EDP_Asm"> Asm </button>
+		<button id="EDP_Obj"> Obj </button>
+		<button id="EDP_Exe"> Exe </button>
+		<button id="EDP_Link"> Link </button>
+		<button id="EDP_Test"> Test </button>
+                -->
 	      </div>
 	      <div class="PaneBody" id="EditorBody">
 		<textarea class="Editor" spellcheck="false" id="EditorTextArea">
@@ -185,19 +191,17 @@ visiting this file in a browser.
 	    
 	    <div class="Pane" id="ProcessorPane">
 	      <div class="PaneButtons">
-		<button id="PP_Reset"> Reset </button>
 		<button id="PP_Boot"> Boot </button>
 		<button id="PP_Step"> Step </button>
-		<button id="PP_Run"> Run </button>
+		<button id="PP_RunWorker"> Run </button>
 		<button id="PP_Pause"> Pause </button>
 		<button id="PP_Interrupt"> Interrupt </button>
-                <button id="PP_emtStep"> emt step </button>
-                <button id="PP_emtRun"> emt run </button>
-                <button id="PP_emtShow"> emt show </button>
-                <button id="PP_emtTest1"> emt test1 </button>
-                <button id="PP_emtTest2"> emt test2 </button>
 		<button id="PP_Breakpoint"> Breakpoint </button>
 		<button id="PP_Refresh"> Refresh </button>
+		<button id="PP_Reset"> Reset </button>
+                <button class="Hidden" id="PP_RunGui"> Run main thread </button>
+                <button class="Hidden" id="PP_Test1"> Test1 </button>
+                <button class="Hidden" id="PP_Test2"> Test2 </button>
 
 	      </div>
 	      <div class="PaneBody" id="ProcessorBody">
@@ -224,10 +228,10 @@ visiting this file in a browser.
 		      <div class="RegisterValue" id="maskElt"></div>
 		      <div class="RegisterName">req</div>
 		      <div class="RegisterValue" id="reqElt"></div>
-		      <div class="RegisterName">istat</div>
-		      <div class="RegisterValue" id='istatElt'></div>
-		      <div class="RegisterName">ipc</div>
-		      <div class="RegisterValue" id='ipcElt'></div>
+		      <div class="RegisterName">rstat</div>
+		      <div class="RegisterValue" id='rstatElt'></div>
+		      <div class="RegisterName">rpc</div>
+		      <div class="RegisterValue" id='rpcElt'></div>
 		      <div class="RegisterName">vect</div>
 		      <div class="RegisterValue" id="vectElt"></div>
 		    </div>
@@ -308,12 +312,36 @@ visiting this file in a browser.
 		  <div class="ProcStateSection" id="Emulator">
 		    <div class="Registers">
 		      <div class="NewRegSecName">Emulator</div>
-		      <div class="RegisterName">s</div>
+		      <div class="RegisterValue" id="procStatus">Initial</div>
+		      <div class="RegisterValue"
+		           id="nInstrExecuted">0 instr</div>
+		      <div class="RegisterValue" id="PP_time"> 0 </div>
+		      <input id="PP_Timer_Interrupt" class="EmCtlLine"
+			     type="button"
+			     value="Timer interrupt">
+
+		      </input>
+<!--
+		      <div class="RegisterValue">hello </div>
+		      <input id="PP_Toggle_Display" class="EmCtlLine"
+		             type="button">
+		      </input>
+-->                  
+
+		    </div>
+		  </div>
+<!--                  
+		  <div class="ProcStateSection" id="Emulator">
+		    <div class="Registers">
+		      <div class="NewRegSecName">Emulator</div>
+		      <div class="RegisterName"> state </div>
 		      <div class="RegisterValue" id="procStatus"></div>
-		      <div class="RegisterName">n</div>
+		      <div class="RegisterName"> count </div>
 		      <div class="RegisterValue" id="nInstrExecuted"></div>
-		      <div class="RegisterName">m</div>
-		      <div class="RegisterValue">break</div>
+		      <div class="RegisterName"> m </div>
+		      <div class="RegisterValue"> </div>
+		      <div class="RegisterName"> Time </div>
+		      <div class="RegisterValue" id="PP_time"> 0 </div>
 		      <input id="PP_Timer_Interrupt" class="EmCtlLine"
 			     type="button"
 			     value="Timer interrupt">
@@ -324,6 +352,7 @@ visiting this file in a browser.
 		      </input>
 		    </div>
 		  </div>
+-->
 		  <div class="ProcStateSection" id="MemSection">
 		    <div class="MemSecName">Memory</div>
 		    <div class="MemDisplay" id="MemDisplay1"></div>
@@ -344,6 +373,14 @@ visiting this file in a browser.
 	      </div>
 	    </div>
 
+	    <div class="Pane" id="OptionsPane">
+	      <div class="PaneButtons">
+		<button id="Options1"> Options 1 </button>
+              </div>
+	      <div class="HighlightedTextAsHtml" id="OptionsBody">
+              </div>
+            </div>
+            
 	    <div class="Pane" id="DevToolsPane">
 	      <div class="PaneButtons">
 		<button id="DevTools100"> DevTools 100 </button>

@@ -26,13 +26,11 @@ import * as em from "./emulator.mjs"
 // Emulator state
 //-----------------------------------------------------------------------------
 
-let emt =
-    {initialized: false,
-     shm: null, // shared system state vector
-     es: null // emulator state
+let emwt = {
+    shm: null, // shared system state vector
+    es: null // emulator state
     }
 
-let emtCount = 0 // local variable for testng
 
 //-----------------------------------------------------------------------------
 // Communication protocol
@@ -44,49 +42,49 @@ self.addEventListener ("message", e => {
         let result = 0 // default
         let msg = {code:0 , payload: 0} // default
         switch (e.data.code) {
-        case 100: // emt init: received shared system state vector
-            console.log ("emt: received request init")
-            emt.shm = e.data.payload
-            emt.es = new em.EmulatorState (emt.shm, em.Mode_Quiet)
-            em.initializeMachineState (emt.es)
-            emt.initialized = true
+        case 100: // emwt init: received shared system state vector
+            console.log ("emwt: received request init")
+            emwt.shm = e.data.payload
+            emwt.es = new em.EmulatorState (em.ES_worker_thread, emwt.shm)
+            em.initializeMachineState (emwt.es)
+            emwt.initialized = true
             msg = {code: 200, payload: 0}
             self.postMessage (msg)
             break
-        case 101: // emt step
-            console.log (`emt: received request step`)
+        case 101: // emwt step
+            console.log (`emwt: received request step`)
             doStep ()
             msg = {code: 201, payload: 0}
             self.postMessage (msg)
             break
-        case 102: // emt run
-            console.log (`emt: received request run`)
+        case 102: // emwt run
+            console.log (`emwt: received request run`)
             result = doRun (e.data.payload)
             msg = {code: 202, payload: result}
             self.postMessage (msg)
             break
         case 103: // show
-            console.log (`emt: received request show`)
+            console.log (`emwt: received request show`)
             show ()
             msg = {code: 203, payload: 0}
             self.postMessage (msg)
             break
         case 104: // test 1
-            console.log (`emt: received request test 1`)
-            let slowResult = longComputation ()
-            msg = {code: 204, payload: slowResult}
+            console.log (`emwt: received request test 1`)
+            //            let slowResult = longComputation ()
+            result = runTest1 ()
+            msg = {code: 204, payload: result}
             self.postMessage (msg)
             break
         case 105: // test 2
-            console.log (`emt: received request test 2`)
-            let rmtestResult = regMemTest ()
+            console.log (`emwt: received request test 2`)
+            rmtestResult = regMemwtest ()
             msg = {code: 205, payload: rmtestResult}
             self.postMessage (msg)
             break
         default:
-            console.log (`emt: received unknown code ${e.data.code}`)
+            console.log (`emwt: received unknown code ${e.data.code}`)
         }
-        emtCount++
     }
 })
 
@@ -125,7 +123,7 @@ class genregister {
         nRegisters++
         this.regNumber = regNumber
         this.regName = regName
-        this.eltName = eltName // not used in emt
+        this.eltName = eltName // not used in emwt
         this.show = showFcn
 //        this.elt = document.getElementById (eltName)
 //	this.elt.innerHTML = this.regStIndex
@@ -258,26 +256,26 @@ function show () {
 }
 
 function showRegs () {
-    console.log (`emt showRegs`)
+    console.log (`emwt showRegs`)
     for (let i = 0; i < shm.EmRegBlockSize; i++) {
         let j = shm.EmRegBlockOffset + i
         let x = sysStateVec [j]
-        //        console.log (`emt reg[${i}] = ${x} (j=${j})`)
-        console.log (`emt reg[${i}] = ${x}`)
+        //        console.log (`emwt reg[${i}] = ${x} (j=${j})`)
+        console.log (`emwt reg[${i}] = ${x}`)
     }
 }
 
 function showMem (limit) {
-    console.log (`emt showMem up to ${limit}`)
+    console.log (`emwt showMem up to ${limit}`)
     for (let a = 0; a <= limit; a++) {
         let j = shm.EmMemOffset + a
         let x = sysStateVec [j]
-        console.log (`emt m[${a}] = ${x}`)
+        console.log (`emwt m[${a}] = ${x}`)
     }
 }
 
-function longComputation () {
-    console.log ("emt long computation, here goes...")
+function runTest1 () {
+    console.log ("emwt long computation, here goes...")
     let sum = 0
     const lim1 = 1000
     const lim2 = 1000
@@ -289,18 +287,37 @@ function longComputation () {
             }
         }
     }
-    console.log ("emt long computation finished!")
+    console.log ("emwt long computation finished!")
+    return sum
+}
+
+
+
+function longComputation () {
+    console.log ("emwt long computation, here goes...")
+    let sum = 0
+    const lim1 = 1000
+    const lim2 = 1000
+    const lim3 = 1000
+    for (let i = 0; i < lim1; i++) {
+        for (let j = 0; j < lim2; j++) {
+            for (let k = 0; k < lim2; k++) {
+                sum += k
+            }
+        }
+    }
+    console.log ("emwt long computation finished!")
     return sum
 }
 
 function regMemTest () {
     let a = pc.get ()
-    console.log (`emt rmtest a = ${a}`)
+    console.log (`emwt rmtest a = ${a}`)
     let b = ir.get ()
-    console.log (`emt rmtest b = ${b}`)
+    console.log (`emwt rmtest b = ${b}`)
     pc.put (a + 10)
     let c = pc.get ()
-    console.log (`emt rmtest c = ${c}`)
+    console.log (`emwt rmtest c = ${c}`)
     return c
     return x
 }
@@ -310,28 +327,54 @@ function regMemTest () {
 //-----------------------------------------------------------------------------
 
 function doStep () {
-    console.log (`emt doStep`)
-    em.executeInstruction (emt.es)
-    console.log (`emt doStep returning`)
+    console.log (`emwt doStep`)
+    em.executeInstruction (emwt.es)
+    console.log (`emwt doStep returning`)
 }
 
 function doRun (limit) {
-    console.log (`emt: start doRun limit=${limit}`)
-    let count = 0
-    //    let startTime = new Date ()
-    let startTime = performance.now ()
-    while (st.readSCB (emt.es, st.SCB_halted) != 1
-           && st.readSCB (emt.es, st.SCB_pause_request) != 1) {
-        em.executeInstruction (emt.es)
+    console.log (`emwt: start doRun limit=${limit}`)
+    let count = st.readNinstrExecuted (emwt.es)
+    let curStatus = st.readSCB (emwt.es, st.SCB_status)
+    let curPauseReq = 0
+    console.log (`starting run status${curStatus}`)
+    let continueRunning = curStatus === st.SCB_running_emwt
+    while (continueRunning) {
+        em.executeInstruction (emwt.es)
+        em.clearLoggingData (emwt.es)
         count++
-      }
-    //    let finishTime = new Date ()
-    let finishTime = performance.now ()
-    let elapsedTime = (finishTime - startTime) / 1000
-    console.log (`emt: doRun finished, executed ${count} instructions`
-                 + ` in ${elapsedTime} sec`)
+        curPauseReq = st.readSCB (emwt.es, st.SCB_pause_request)
+        if (curPauseReq === 1) {
+            console.log ("emwt received pause request")
+            st.writeSCB (emwt.es, st.SCB_status, st.SCB_paused)
+            st.writeSCB (emwt.es, st.SCB_pause_request, 0)
+            continueRunning = false
+        }
+        curStatus = st.readSCB (emwt.es, st.SCB_status)
+        if (curStatus === st.SCB_relinquish) {
+            continueRunning = false
+        }
+    }
+    st.writeNinstrExecuted (emwt.es, count)
+    console.log (`emwt run stopped, count=${count},`
+                 + `status=${curStatus}, pause=${curPauseReq}`)
     return count
 }
-//        console.log (`emt doRun count=${count}`)
 
-console.log ("emtthread has been read")
+//    let startTime = performance.now ()
+//    let finishTime = performance.now ()
+//    let elapsedTime = (finishTime - startTime) / 1000
+//    console.log (`emwt: doRun finished, executed ${count} instructions`
+//                 + ` in ${elapsedTime} sec`)
+//     b = curStatus === st.SCB_running_emwt && curPauseReq === 0
+//        b =  (st.readSCB (emwt.es, st.SCB_status) === st.SCB_running_emwt
+//              && st.readSCB (emwt.es, st.SCB_pause_request) === 0)
+//    console.log (`doRun count=${count} b=${b}`)
+//    b =  (st.readSCB (emwt.es, st.SCB_status) === st.SCB_running_emwt
+//          && st.readSCB (emwt.es, st.SCB_pause_request) === 0)
+//        console.log (`doRun count=${count} b=${b}`)
+//        console.log ("emwt doRun execute instruction")
+//    while (st.readSCB (emwt.es, st.SCB_status) === st.SCB_running_emwt
+//           && st.readSCB (emwt.es, st.SCB_pause_request) === 0) {
+
+console.log ("emwthread has been read")

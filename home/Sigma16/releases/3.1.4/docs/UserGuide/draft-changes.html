@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-07 Thu 14:51 -->
+<!-- 2021-01-04 Mon 09:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>&lrm;</title>
+<title>Version 3.2.0, January 2021</title>
 <meta name="generator" content="Org mode" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
@@ -179,7 +179,7 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="../datafiles/index.css" />
+<link rel="stylesheet" type="text/css" href="./index.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -229,94 +229,105 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1>Sigma16</h1>
-
-Version 3.1.4, January 2021.  Copyright (c) 2020, 2021 John T. O'Donnell.
-For the latest version, see
-  <a href="https://jtod.github.io/home/Sigma16/" target="_blank">
-    https://jtod.github.io/home/Sigma16
-  </a>
-
-<div id="outline-container-orge9aa7bb" class="outline-2">
-<h2 id="orge9aa7bb">Overview</h2>
-<div class="outline-text-2" id="text-orge9aa7bb">
+<h1 class="title">Version 3.2.0, January 2021</h1>
 <p>
-Sigma16 is a computer architecture designed for research and teaching
-in computer systems.  This application provides a complete environment
-for experimenting with the architecture, including an editor,
-assembler, linker, emulator, and an integrated development
-environment.  There is a digital circuit that implements the
-architecture, which is specified using the Hydra functional hardware
-description language.  Hydra can simulate the circuit, and machine
-language programs can run on both the emulator and the circuit.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgab1c6ca" class="outline-2">
-<h2 id="orgab1c6ca">Getting started</h2>
-<div class="outline-text-2" id="text-orgab1c6ca">
-<p>
-The User Guide begins with a set of tutorials that introduce the
-system.  The best place to start is with the <b>Hello, World!</b> tutorial.
-After working through the tutorials, see the rest of the User Guide
-for detailed documentation.
+Version 3.2 brings several changes that will be visible to users of
+previous versions of Sigma16:
 </p>
 
-The User Guide appears in the right side of the window.  You can
-increase or decrease its size by clicking the arrow buttons at the
-right side of the top button box, and you can also <a
-href="../../docs/UserGuide/Sigma16UserGuide.html" target="_blank">open
-the user guide in a new window</a>.
-</div>
-</div>
+<ul class="org-ul">
+<li><i>cmplt, cmpeq, cmpgt are removed.</i> Instead, use the <code>cmp</code>
+instruction, which sets the condition code (<code>R15</code>), and then use any
+of the conditional jump instructions <code>jumplt</code>, <code>jumple</code>, <code>jumpeq</code>,
+<code>jumpne</code>, <code>jumpge</code>, <code>jumpgt</code>.  (Rationale: There are more Booleans
+in the condition code than just less-than, equal, and greater-than.
+The new style accomodates all the conditions in a uniform manner,
+but the old style does not.  Version 3.1 already supported <code>cmp</code> and
+the conditional jumps.)  Here's an example:</li>
+</ul>
 
-<div id="outline-container-org14998f9" class="outline-2">
-<h2 id="org14998f9">Updates and further information</h2>
-<div class="outline-text-2" id="text-org14998f9">
-The <a href="https://jtod.github.io/home/Sigma16/"
-target="_blank">Sigma16 Home Page</a> contains a link to run the
-latest version as well as up-to-date information on the system.  It's
-best to bookmark the home page, not this specific release.  If you
-always launch the app by clicking the link in the home page, you'll
-always be running the most recent release.
+<pre class="example">
+; Old style -- these instructions have been removed
+     cmplt   R1,R2,R3      ; R1 := R2 &lt; R3
+     jumpt   R1,loop[R0]   ; if R2 &lt; R3 then goto loop
+; New style -- use the following instead
+     cmp     R2,R3         ; compare R2 with R3
+     jumplt  loop[R0]      ; if R2 &lt; R3 then goto loop
+</pre>
 
-The source code is available on the <a
-href="https://github.com/jtod/Sigma16/" target="_blank">source
-repository</a>.
-</div>
-</div>
-
-<div id="outline-container-orgfb5ca24" class="outline-2">
-<h2 id="orgfb5ca24">License</h2>
-<div class="outline-text-2" id="text-orgfb5ca24">
-<p>
-License: GNU GPL Version 3 or later.
-</p>
-
-<p>
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or (at
-your option) any later version.
-</p>
+<ul class="org-ul">
+<li><i>jumpf is renamed to jumpz, and jumpt is renamed to jumpnz.</i> The new
+names stand for <i>jump if zero</i> and <i>jump if not zero</i>.  Most old
+programs will use <code>jumpf</code> or <code>jumpt</code> only after <code>cmplt</code>, <code>cmpeq</code>, or
+<code>cmpgt</code>, but following <code>cmp</code> you should use one of the conditional
+jumps listed above. (Rationale: The new names reflect more
+accurately what the instructions actually do.  The decision about
+whether to jump depends on whether the entire register contains 0;
+it isn't a decision based on checking just a single bit.)</li>
+</ul>
 
 <p>
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
+The following changes do not require modifying old programs; they just
+relax the syntax rules so some programs would no longer give an error
+message.
 </p>
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <a
-href="https://www.gnu.org/licenses/"
-target="_blank">https://www.gnu.org/licenses/</a>
-</div>
-</div>
+<ul class="org-ul">
+<li><i>[R0] is optional.</i> In previous versions of Sigma16, every
+displacement requires the index register to be stated explicitly,
+even if it's <code>R0</code>: for example, <code>load R3,xyz[R0]</code>.  Now, the <code>[R0]</code>
+can be omitted, although you can include it if you wish.  Thus <code>load
+  R3,xyz</code> and <code>load R3,xyz[R0]</code> are equivalent.  (Rationale: The
+reason for requiring <code>[R0]</code> in the past was to emphasise the
+regularity of the instruction representation.  However, a primary
+aim of the design of Sigma16 is to provide subsetting of the
+architecture, which supports a spiral approach to learning computer
+architecture.  Another aim is to provide a good platform for schools
+or other students who will just learn a little of the system.
+Removing the requirement for <code>[R0]</code> simplifies the language for a
+beginner.  Furthermore, for an experienced expert programmer it's
+more readable to omit the <code>[R0]</code> as this reduces the amount of
+clutter in the code.)</li>
+
+<li><i>Allow lower case "r" in register names.</i> In previous versions,
+elements of the register file required an upper case <code>R</code>: for
+example, <code>R8</code>.  Now you can write <code>r8</code> as well as <code>R8</code>, and both
+names refer to the same register.  (Of course the same holds for the
+rest of the register file.)  This is a trivial syntax issue.
+There's no technical reason to prefer <code>r8</code> or <code>R8</code>; it's just a
+matter of personal preference.  It may be easier to read <code>r8</code>
+because the lower case <code>r</code> is shorter than the digits.  It's good
+style to use either the <code>Rn</code> or <code>rn</code> form consistently, but the
+assembly language doesn't enforce that. Labels are case sensitive but
+registers are not.    Labels are case-sensitive,
+so <code>xyz</code> and <code>XYZ</code> are distinct names, but registers are not labels,
+and registers are not case sensitive.</li>
+</ul>
+
+<p>
+There are some changes to the machine language that don't affect
+assembly language programs.
+</p>
+
+<ul class="org-ul">
+<li>Some of the opcodes have changed, so programs need to be
+reassembled.</li>
+
+<li>The word logic instructions <code>inv</code>, <code>and</code>, <code>or</code>, <code>xor</code> are now
+pseudoinstructions that generate the <code>logicw</code> instruction.  The
+assembly language syntax is the same as before; only the underlying
+machine language representation is different</li>
+</ul>
+
+<p>
+There are some new instructions and features, as well as some
+instructions and features that have been in the architecture for some
+time but weren't documented in the User Gude.  These won't affect
+existing programs.
+</p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Created: 2021-01-07 Thu 14:51</p>
+<p class="date">Created: 2021-01-04 Mon 09:22</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

@@ -95,7 +95,8 @@ pane height
     --examplesBotSecHeight: 30em; /* calc or make full height */
 /* Basic GUI elements */
     --button-box-background-color: var(--light-blue);
-    --subpanel-background-color: beige;
+/*    --subpanel-background-color: beige; */
+    --subpanel-background-color: ivory;
     --mem-display-width: 6.8em;  /* 6.1em too narrow */
 
     /* YES???????????  with wide size we get several locations per line,
@@ -104,7 +105,7 @@ scroll from working */
 
     --mem-display-height: 15em; /* not correct */
     --reg-name-val-sep: 0.7em;
-    --IOinputbuffer-background: yellow;
+    --IOinputbuffer-background: ivory;
 /* fonts */    
     --main-font-family: 'Lucida Console',monospace;
 /*    --main-font-size: 0.9em; */
@@ -158,7 +159,6 @@ scroll from working */
     --text-background-color: white;
 }
 .MidMainRight {
-    background-color: pink;
     background-color: var(--mid-main-separator-color);
     background-color: white;
 }
@@ -551,7 +551,8 @@ guide). */
     grid-column-end: ProcStateVlineIOstart;
     grid-row-start: ProcStateHlineStart;
     grid-row-end: ProcStateHlineEnd;
-    background-color: beige;
+/*    background-color: beige; */
+    background-color: ivory;
     display: grid;
     height: auto;
     width: auto;
@@ -601,6 +602,20 @@ guide). */
     width: var(--mem-display-width);
 }
 
+
+.EmuDisplay {
+    display: grid;
+    height: auto;
+    width: auto;
+    background-color: var(--subpanel-background-color);
+    color: black;
+    grid-template-rows: [RegHlineStart] min-content [RegHlineEnd];
+    grid-template-columns: [RegVlineStart] min-content
+					   [RegVlineRNameEnd]
+					   var(--reg-name-val-sep)
+					   [RegVlineRValStart] min-content
+					   [RegVlineEnd];
+}
 
 .Registers {
     display: grid;
@@ -822,7 +837,7 @@ don't include fonts as these are specified by HighlightedTextAsHtml
     height: var(--ProcAsmTextHeight);
 }
 
-/* Highlighting */
+/* At startup, hide devtools elements  */
 
 .Hidden {
     visibility: hidden;
@@ -937,7 +952,6 @@ don't include fonts as these are specified by HighlightedTextAsHtml
 }
 }
 .MidMainRight {
-    background-color: pink;
     background-color: var(--mid-main-separator-color);
     background-color: white;
 }
@@ -953,3 +967,13 @@ don't include fonts as these are specified by HighlightedTextAsHtml
 .CodeListing {
     background-color: green;
 }
+
+#ProcAsmListing {
+    background-color: white;
+}
+
+#WelcomeIframeId, #ExamplesIframeId, #EditorTextArea {
+    background-color: white;
+}
+
+

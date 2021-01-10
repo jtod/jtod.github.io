@@ -33,6 +33,17 @@ export const Mode_GuiDisplay = 100
 export const Mode_Console    = 200
 export const Mode_Quiet      = 300
 
+// Number of header lines in the listing before the source lines begin
+const listingLineInitialOffset = 1;
+
+
+// Time
+
+export function clearTime (es) {
+    const now = new Date ()
+    es.startTime = now.getTime ()
+    document.getElementById("PP_time").innerHTML = `0ms`
+}
 
 //------------------------------------------------------------------------------
 // Booter 
@@ -90,11 +101,13 @@ export function boot (es) {
     com.mode.trace = true;
     com.mode.devlog ("boot");
     com.mode.devlog (`current emulator mode = ${es.mode}`)
-    initializeProcessorElements (es);  // so far, it's just instr decode
+    st.resetSCB (es)
+    
     let m = st.env.getSelectedModule ();
     let exe = obtainExecutable ();
     const objectCodeText = exe.objText;
     const metadataText   = exe.mdText;
+    initializeProcessorElements (es);  // so far, it's just instr decode
 //    com.mode.devlog ("------------- boot reading code --------------- ")
 //    com.mode.devlog (`*** Boot object code = ${objectCodeText}`)
 //    com.mode.devlog (`*** Boot metadata = ${metadataText}`)
@@ -110,10 +123,11 @@ export function boot (es) {
     let isExecutable = true; // will set to false if module isn't bootable
     let location = 0; // address where next word will be stored
     document.getElementById('ProcAsmListing').innerHTML = "";
-    es.nInstructionsExecuted = 0;
+//    es.nInstructionsExecuted = 0;
     st.writeSCB (es, st.SCB_nInstrExecuted, 0)
-    document.getElementById("nInstrExecuted").innerHTML =
-	es.nInstructionsExecuted;
+    guiDisplayNinstr (es)
+//    document.getElementById("nInstrExecuted").innerHTML =
+//	es.nInstructionsExecuted;
     ioLogBuffer = "";
     refreshIOlogBuffer();
     com.mode.trace = true;
@@ -154,10 +168,22 @@ export function boot (es) {
         com.mode.devlog ("boot ok so far, preparing...");
         es.metadata.listingDec.forEach ((x,i) => es.asmListingCurrent[i] = x);
         initListing (m,es);
-        setProcStatus (es,Ready);
+        es.curInstrAddr = 0;
+        es.curInstrLineNo = -1;  // -1 indicates no line has been highlighted
+        es.nextInstrAddr = 0;
+        es.nextInstrLineNo = es.metadata.getSrcIdx (es.nextInstrAddr)
+            + listingLineInitialOffset;
+            com.highlightListingLine (es, es.nextInstrLineNo, "NEXT");
+        setProcAsmListing (es,m);
+
+        st.writeSCB (es, st.SCB_status, st.SCB_ready)
         getListingDims(es);
-        resetRegisters ();
-        memDisplay(es);
+        resetRegisters (es);
+        es.pc.put (0) // shouldn't be needed?
+        refreshRegisters (es)
+        updateMemory (es)
+        memDisplayFull(es);
+        clearTime (es)
         let xs =  "<pre class='HighlightedTextAsHtml'>"
             + "<span class='ExecutableStatus'>"
             + "Boot was successful"
@@ -165,7 +191,7 @@ export function boot (es) {
             + "</pre>";
         com.mode.devlog ("boot was successful")
     } else {
-        setProcStatus (es,Reset);
+        st.writeSCB (es, st.SCB_status, st.SCB_reset)
         let xs =  "<pre class='HighlightedTextAsHtml'>"
             + "<span class='ExecutableStatus'>"
             + "Boot failed: module is not executable"
@@ -175,7 +201,15 @@ export function boot (es) {
         com.mode.devlog ("boot failed");
         alert ("boot failed");
     }
+    if (es.thread_host === ES_gui_thread) {
+        document.getElementById("procStatus").innerHTML = st.showSCBstatus (es)
+    }
     com.mode.devlog ("boot returning");
+}
+
+export function refreshProcStatusDisplay (es) {
+    let xs = st.showSCBstatus (es)
+    document.getElementById("procStatus").innerHTML = xs
 }
 
 export let highlightedRegisters = [];
@@ -188,15 +222,6 @@ export function displayFullState (es) {
     updateMemory (es)
     memDisplayFull (es);
 }
-
-//------------------------------------------------------------------------------
-// Processor execution status
-//------------------------------------------------------------------------------
-
-export let Reset  = Symbol ("Reset");   // registers and memory cleared
-export let Ready  = Symbol ("Ready");   // can execute instruction
-export let Paused = Symbol ("Paused");  // temporary halt for inspecting state
-export let Halted = Symbol ("Halted");  // trap 0 has executed
 
 //----------------------------------------------------------------------
 //  Registers
@@ -214,7 +239,7 @@ export let modeHighlightAccess = true;
 // Declare the registers - window.onload sets their values
 // export let regFile = [];                            // register file R0,..., R15
 //export let pc, ir, adr, dat;                        // instruction control registers
-// export let statusreg, mask, req, istat, ipc, vect;  // interrupt control registers
+// export let statusreg, mask, req, rstat, rpc, vect;  // interrupt control registers
 // export let bpseg, epseg, bdseg, edseg;              // segment control registers
 
 // Generating and accessing registers
@@ -301,49 +326,42 @@ export class genregister {
         this.regName = regName
         this.eltName = eltName
         this.show = showFcn
-        this.elt = es.mode === Mode_GuiDisplay
-            ? document.getElementById (eltName)
+        this.elt = this.es.thread_host === ES_gui_thread
+            ? document.getElementById (this.eltName)
             : null
         es.register.push (this)
     }
     get () {
-        regFetched.push (this)
+        this.es.regFetched.push (this)
         let i = st.EmRegBlockOffset + this.regStIndex
-        com.mode.devlog (`--- reg get ${this.regName} with`
-                     + `  (idx=${i})`)
         let x = this.regStIndex === 0 ? 0 : this.es.shm[i]
-        com.mode.devlog (`--- reg get ${this.regName} =`
-                     + ` ${arith.wordToHex4(x)} = ${x} (idx=${i})`)
         return x
     }
     put (x) {
-        regStored.push (this)
+        this.es.regStored.push (this)
         let i = st.EmRegBlockOffset + this.regStIndex
         this.es.shm[i] = x
         if (this.regIdx < 16) { // register file
             instrEffect.push (["R", this.regNumber, x, this.regName]);
         }
-        com.mode.devlog (`--- reg put ${this.regName} :=`
-                     + ` ${arith.wordToHex4(x)} = ${x} (idx=${i})`)
+//        com.mode.devlog (`--- reg put ${this.regName} :=`
+//                     + ` ${arith.wordToHex4(x)} = ${x} (idx=${i})`)
     }
     highlight (key) {
-        if (this.es.mode === Mode_GuiDisplay) {
+//        console.log (`reg-highlight ${this.regName} ${key}`)
+        if (this.es.thread_host === ES_gui_thread) {
             let i = st.EmRegBlockOffset + this.regStIndex
             let x = this.regStIndex === 0 ? 0 : this.es.shm[i]
             let xs = highlightText (this.show(x), key)
-            com.mode.devlog (`--- reg highlight ${this.regName} := ${xs} (idx=${i})`)
             this.elt.innerHTML = xs
         } else {
-            com.mode.devlog (`reg ${this.regName} skippling highlight ${key}`)
         }
     }
     refresh () {
-        if (this.es.mode === Mode_GuiDisplay) {
+        if (this.es.thread_host === ES_gui_thread) {
             let i = st.EmRegBlockOffset + this.regStIndex
             let x = this.regStIndex === 0 ? 0 : this.es.shm[i]
             let xs = this.show (x)
-//            com.mode.devlog (`--- reg refresh ${this.regName} :=`
-//                         + ` ${arith.wordToHex4(x)} = ${x} /${xs}/ (idx=${i})`)
             this.elt.innerHTML = xs
         }
     }
@@ -354,7 +372,6 @@ export class genregister {
 
 function resetRegisters (es) {
     com.mode.devlog('Resetting registers');
-    return // ??????????
     for (let i = 0; i < es.nRegisters; i++) {
         es.register[i].put (0)
         es.register[i].refresh ()
@@ -362,28 +379,18 @@ function resetRegisters (es) {
 }
 
 export function refresh (es) {
+    console.log ("Refresh")
     refreshRegisters (es)
     memRefresh (es)
     memDisplayFull (es)
-    com.mode.devlog (`refresh getting n`)
-    let n = st.readSCB (es, st.SCB_nInstrExecuted)
-    com.mode.devlog (`refresh n=${n}`)
-    updateInstructionCount (n)
+    refreshProcStatusDisplay (es)
+    guiDisplayNinstr (es)
 }
+//    let n = st.readSCB (es, st.SCB_nInstrExecuted)
+//    com.mode.devlog (`refresh getting n`)
+//    com.mode.devlog (`refresh n=${n}`)
+//    updateInstructionCount (n)
 
-// Refresh all the registers.  This ensures the display corresponds to the
-// current values, and it also removes any highlighting of the registers.
-
-function refreshRegisters (es) {
-    com.mode.devlog('Refreshing registers');
-    for (let i = 0; i < es.nRegisters; i++) {
-	es.register[i].refresh();
-    }
-    regFetched = []
-    regFetchedOld = []
-    regStored = []
-    regStoredOld = []
-}
 
 //------------------------------------------------------------------------------
 // Emulator state
@@ -400,27 +407,30 @@ function refreshRegisters (es) {
 // state is created, and mode is the current value, which might change
 // during execution.
 
+// ES_thread_host indicates which thread this emulator instance is running in
+export const ES_gui_thread   = 0
+export const ES_worker_thread     = 1
+
 export class EmulatorState {
-    constructor (shm, initialMode) {
-        this.shm = shm
-        this.initialMode            = initialMode
-        this.mode                   = initialMode
-        this.procStatus             = Reset
-	this.nInstructionsExecuted  = 0
-	this.instrLooperDelay       = 1000
-	this.instrLooperShow        = false
-	this.breakEnabled           = false
-     	this.breakPCvalue       = 0
-	this.doInterrupt        = 0
-        this.pc                 = null
-        this.ir                 = null
-        this.adr                 = null
-        this.dat                 = null
-        this.statusreg          = null
-        this.mask               = null
+    constructor (thread_host, shm) {
+        this.thread_host      = thread_host
+        this.shm              = shm
+        this.startTime        = null
+        this.eventTimer       = null  // returned by setInterval
+	this.instrLooperDelay = 1000
+	this.instrLooperShow  = false
+	this.breakEnabled     = false
+     	this.breakPCvalue     = 0
+	this.doInterrupt      = 0
+        this.pc               = null
+        this.ir               = null
+        this.adr              = null
+        this.dat              = null
+        this.statusreg        = null
+        this.mask             = null
         this.req  = null
-        this.istat  = null
-        this.ipc = null
+        this.rstat  = null
+        this.rpc = null
         this.vect = null
         this.bpseg = null
         this.epseg = null
@@ -458,6 +468,20 @@ export class EmulatorState {
 	this.nextInstrLineNo    = -1
 	this.saveCurSrcLine     = ""
 	this.saveNextSrcLine    - ""
+        this.memElt1 = null
+        this.memElt2 = null
+        this.instrCodeElt = null
+        this.instrFmtElt  = null
+        this.instrOpElt   = null
+        this.instrArgsElt = null
+        this.instrEAElt   = null
+        this.instrCCElt   = null
+        this.instrEffect1Elt = null
+        this.instrEffect2Elt = null
+        this.regFetchedOld = []
+        this.regStoredOld = []
+        this.regFetched = []
+        this.regStored = []
     }
 }
 
@@ -500,8 +524,8 @@ export function initializeMachineState (es) {
     // bit 2        trap 3
     // bit 3        
 
-    es.istat    = new genregister (es, 0, 'istat',  'istatElt',  arith.wordToHex4);
-    es.ipc      = new genregister (es, 0, 'ipc',    'ipcElt',    arith.wordToHex4);
+    es.rstat    = new genregister (es, 0, 'rstat',  'rstatElt',  arith.wordToHex4);
+    es.rpc      = new genregister (es, 0, 'rpc',    'rpcElt',    arith.wordToHex4);
     es.vect     = new genregister (es, 0, 'vect',   'vectElt',   arith.wordToHex4);
 
 // Segment control registers
@@ -514,7 +538,7 @@ export function initializeMachineState (es) {
     es.controlRegisters =
 	[es.pc, es.ir, es.adr, es.dat,   // not accessible to getctl/putctl instructions
 	 // the following can be used for getctl/getctl, indexing from 0
-	 es.statusreg, es.mask, es.req, es.istat, es.ipc, es.vect,
+	 es.statusreg, es.mask, es.req, es.rstat, es.rpc, es.vect,
          es.bpseg, es.epseg, es.bdseg, es.edseg
 	]
 
@@ -590,9 +614,9 @@ let memDispOffset = 3;                  // how many locations above highligted o
 // Must wait until onload event
 
 function memInitialize (es) {
-    if (es.mode === Mode_GuiDisplay) {
-        memElt1 = document.getElementById('MemDisplay1');
-        memElt2 = document.getElementById('MemDisplay2');
+    if (es.thread_host === ES_gui_thread) {
+        es.memElt1 = document.getElementById('MemDisplay1');
+        es.memElt2 = document.getElementById('MemDisplay2');
         memClear(es);    // set each location to 0
         memRefresh(es);  // generate a string showing each location
         memDisplay(es);  // put the strings into the gui display elements
@@ -621,7 +645,6 @@ function memInitialize (es) {
 
 function memClear (es) {
     for (let a = 0; a < memSize; a++) {
-        //	memory[i] = 0;
         memStore (es, a, 0)
     }
     memFetchInstrLog = [];
@@ -659,44 +682,9 @@ function memStore (es, a,x) {
     es.shm[st.EmMemOffset + a] = x
 }
 
-
-function memTest1a () {
-    com.mode.devlog('testMem1a');
-    memClear ();
-    memStore(3,7);
-    memStore(6,2);
-    memDisplay ();
-}
-
-function memTest1b (es) {
-    com.mode.devlog('testMem1b');
-    let y = memFetchInstr(es,6);
-    memStore(300,20);
-    memDisplay ();
-}
-
-function memTest2 (es) {
-    com.mode.devlog('testMem2');
-    memClear ();
-    let y = memFetchInstr (es,32768);
-    let q = memFetchData (es,50);
-    memStore (65520, 7);
-//    memShowAccesses ();
-    memDisplay (es);
-}
-
 //------------------------------------------------------------------------------
 // Processor execution status
 //------------------------------------------------------------------------------
-
-
-function showProcStatus (s) {
-    return s == Reset ? "Reset"
-        : s == Ready  ? "Ready"
-        : s == Paused ? "Paused"
-        : s == Halted ? "Halted"
-        : "Unknown"
-}
 
 // Global variables for instruction decode; used in emulator
 
@@ -722,9 +710,9 @@ let ea = 0;  // effective address
 // Interrupts
 //-----------------------------------------------------------------------------
 
-export function timerInterrupt() {
+export function timerInterrupt (es) {
     com.mode.devlog ("Timer Interrupt clicked");
-    arith.setBitInRegBE (req, arch.timerBit);
+    arith.setBitInRegBE (es.req, arch.timerBit);
     es.req.refresh();
 }
 
@@ -832,39 +820,61 @@ function showLst (es, xs, i) {
 // Step and run instructions
 //------------------------------------------------------------------------------
 
+// Runs in main gui thread
+
 export function procStep (es) {
-    com.mode.devlog ('procStep');
-    if (es.procStatus===Paused) { setProcStatus (es,Ready); }
-    if (es.procStatus===Ready) {
-	execInstrPrepareFull (es);
-	executeInstruction (es);
-        com.mode.devlog ("procStep: executeInstruction finished");
-        execInstrPostDisplay (es);
+    if (es.thread_host != ES_gui_thread) {
+        console.log (`procStep: host=${es.thread_host}, skipping`)
+        return
+    }
+    let q = st.readSCB (es, st.SCB_status)
+    switch (q) {
+    case st.SCB_ready:
+    case st.SCB_paused:
+    case st.SCB_break:
+    case st.SCB_relinquish:
+        console.log ("procStep: main thread executing instruction...")
+        st.writeSCB (es, st.SCB_status, st.SCB_running_gui)
+        executeInstruction (es)
+        if (st.readSCB (es, st.SCB_status) != st.SCB_halted) {
+            st.writeSCB (es, st.SCB_status, st.SCB_ready)
+        }
+        execInstrPostDisplay (es)
+        guiDisplayNinstr (es)
+        break
+    case st.SCB_reset:
+    case st.SCB_running_gui:
+    case st.SCB_running_emwt:
+    case st.SCB_halted:
+    case st.SCB_blocked:
+        console.log ("procStep skipping instruction...")
+        break
+    default: console.log (`error: procStep unknown SCB_tatus= ${q}`)
     }
 }
 
-export function procRun(es) {
-    com.mode.devlog ("procRun");
-    if (es.procStatus===Paused) { setProcStatus (es,Ready); }
-    execRunPrepare (es);
-    instructionLooper (es);
-    runInstrPostDisplay (es);
+// Separate clearing state from refreshing display
+export function procReset (es) {
+    console.log ("em reset");
+    com.mode.devlog ("reset the processor");
+    st.resetSCB (es)
+    resetRegisters (es);
+    memClear (es);
+    clearTime (es)
+    refreshDisplay (es)
 }
 
-export function procReset (es) {
-    com.mode.devlog ("reset the processor");
-    setProcStatus (es,Reset);
-    resetRegisters (es);
+export function refreshDisplay (es) {
     refreshRegisters (es);
-    memClear ();
-//    memClearAccesses ();
     memDisplay (es);
     document.getElementById('ProcAsmListing').innerHTML = "";
     clearInstrDecode (es);
     refreshInstrDecode (es);
-    es.nInstructionsExecuted = 0;
-    st.writeSCB (es, st.SCB_nInstrExecuted, 0)
-    document.getElementById("nInstrExecuted").innerHTML = es.nInstructionsExecuted;
+    guiDisplayNinstr (es)
+    ioLogBuffer = ""
+    refreshIOlogBuffer ()
+    st.showSCBstatus (es)
+//    memClearAccesses ();
 }
 
 //------------------------------------------------------------------------------
@@ -875,26 +885,35 @@ export function procReset (es) {
 // Yield control each iteration to avoid blocking the user interface,
 // particularly the manual timer interrupt button.
 
-function instructionLooper (es) {
-    if (es.procStatus===Ready) {
-	com.mode.devlog ('instructionLooper');
-        execInstrPrepareFast (es);
-	executeInstruction (es);
-        if (es.procStatus===Halted) {
-	    com.mode.devlog ("looper: halted");
-            execInstrPostDisplay (es);
-        } else if (es.procStatus===Paused) {
-        } else if (es.breakEnabled && es.pc.get() === es.breakPCvalue) {
-	    com.mode.devlog ("looper: breakpoint");
-            setProcStatus (es,Paused);
-            displayFullState (es);
-	} else {
-	    setTimeout (function () {instructionLooper(es)});
-        }
+export function procRun (es) {
+    let q = st.readSCB (es, st.SCB_status)
+    if (q === st.SCB_ready || q === st.SCB_paused) {
+        com.mode.devlog ("procRun: start looper in gui thread");
+        instructionLooper (es);
+        execInstrPostDisplay (es)
+    } else {
+        console.log (`procRun skipping: SCB_status=${q}`)
     }
-    com.mode.devlog ('instructionLooper terminated');
 }
 
+// Run instructions in the main gui thread.  Caller should check the
+// system status before calling the looper; it's assumed that it is ok
+// to execute an instruction in the gui thread.
+
+function instructionLooper (es) {
+    st.writeSCB (es, st.SCB_status, st.SCB_running_gui)
+    executeInstruction (es);
+    let q = st.readSCB (es, st.SCB_status)
+    switch (q) {
+    case st.SCB_running_gui:
+	setTimeout (function () {instructionLooper(es)});
+        break
+    default:
+        execInstrPostDisplay (es)
+    }
+    st.writeSCB (es, st.SCB_status, st.SCB_ready)
+    com.mode.devlog ('instructionLooper terminated');
+}
 
 //---------------------------------------------------------------------------
 // Breakpoint
@@ -967,73 +986,39 @@ function breakClose () {
 // (for running) Prepare the displays before running sequence of
 // instructions (the Run button).
 
-function execRunPrepare (es) {
-    com.mode.devlog ("execRunPrepare");
-    refreshRegisters (es)
-    memRefresh(es);
-    memDisplay (es);                   // refresh memory display
-    clearInstrDecode (es);           // remove decoding of last instruction
-    prepareListingBeforeInstr (es);  //remove any instruction highlighting
-    setProcAsmListing (es);
-}
-
-// (for runing) Prepare to execute an instruction while in Run mode: clear
-// the logs but don't keep memory updated.  This assumes that the
-// displays have already been put into a suitable state fur the
-// duration of the run.
-
-function execInstrPrepareFast (es) {
-    com.mode.devlog ("execInstrPrepareFast");
-// don't refresh the registers (no regClearAccesses), just clear logs
-//    regFetched = [];  // clear reg fetch log
-//    regStored = [];   // clear reg update log
-// don't refresh memory (no memClearAccesses), just clear logs
-    memFetchInstrLog = [];
-    memFetchDataLog = [];
-    memStoreLog = [];
-// don't need to clear instrDecode as we aren't updating it in fast mode
-// don't need to prepareListing as we aren't updating it in fast mode
-}
-
-// (for stepping) Prepare to execute an instruction with full logging:
-// clear the logs and update all the displays.
-
-function execInstrPrepareFull (es) {
-    com.mode.devlog ("execInstrPrepareFast");
-    clearInstrDecode (es);
-    prepareListingBeforeInstr (es);
-}
 
 // (for stepping) Display the effects of the instruction
 
-function execInstrPostDisplay (es) {
-    if (es.procStatus===Halted) { // do a full display
-        updateRegisters (es)
+export function execInstrPostDisplay (es) {
+    console.log ("execInstrPostDisplay")
+    switch (es.thread_host) {
+    case ES_worker_thread: // should be impossible
+        break;
+    case ES_gui_thread:
+        //    clearRegisterHighlighting (es); // deprecated
+        console.log ("main: execInstrPostDisplay, proceeding")
         updateMemory (es)
-        memDisplayFull (es);
-	showInstrDecode (es);
-	highlightListingAfterInstr (es);
-    } else if (es.procStatus===Paused) {
+        memDisplay (es)
+        showInstrDecode (es)
+        guiDisplayNinstr (es)
         updateRegisters (es)
-        updateMemory (es)
-	memDisplay (es);
-	showInstrDecode (es);
-	highlightListingAfterInstr (es);
-    } else { // do normal display
-        updateRegisters (es)
-        updateMemory (es)
-	memDisplay (es);
-	showInstrDecode (es);
-	highlightListingAfterInstr (es);
+        document.getElementById("procStatus").innerHTML = st.showSCBstatus (es)
+        highlightListingAfterInstr (es)
+        break
+    default: // should be impossible
+        console.log (`error: execInstrPostDisplay host=${es.thread_host}`)
     }
 }
 
-function runInstrPostDisplay (es) {
-    com.mode.devlog("runInstrPostDisplay");
-    clearRegisterHighlighting (es);
-    updateRegisters (es)
-    updateMemory (es)
-    memDisplayFull (es);
+// When running, the logging data isn't needed.  The worker thread
+// needs to clear it to prevent a space leak.
+
+export function clearLoggingData (es) {
+    es.regFetched = []
+    es.regStored = []
+    memFetchInstrLog = []
+    memFetchDataLog = []
+    memStoreLog = []
 }
 
 // Prepare to execute an instruction by clearing the buffers holiding
@@ -1052,77 +1037,31 @@ function prepareExecuteInstruction (es) {
 // Machine language semantics
 //------------------------------------------------------------------------------
 
-// Execute one instruction and return
-
-// kludge check... remove
-//    if ((getBitInReg (statusreg,intEnableBit) ? (mr ?req.get() & mask.get()) : 0) != 0) {
-//	while (i<16 && getBitInReg(req,i)==0 && getBitInReg(mask,i)==0) {
-
-// com.mode.devlog (`interrupt priority search mask=${wordToHex4(mask.get())} req=${wordToHex4(req.get())}`);
-//	    com.mode.devlog(`find interrupt trying i=${i} r=${getBitInReg(req,i)} m=${getBitInReg(mask,i)}`);
+// Execute one instruction; runs in either in any thread
 
 export function executeInstruction (es) {
     com.mode.devlog (`em.executeInstruction starting`)
-    com.mode.devlog (`executeInstruction mode=${es.mode}`)
 
-    /*
-    com.mode.devlog ("^^^^^^^^^^ execute instruction")
-    com.mode.devlog (`nregs=${nRegisters} ${register.length}`)
-    for (let x of register) {
-        com.mode.devlog (`${x.regStIndex} ${x.regName}`)
-    }
-    com.mode.devlog ("^^^^^^^^^^ execute instruction thats all folks")
-    com.mode.devlog ("^^^^^^^^^^ execute instruction")
-    com.mode.devlog (`ssv[3] = ${st.sysStateVec[3]}`)
-    st.sysStateVec[3] = 42
-    com.mode.devlog (`ssv[3] = ${st.sysStateVec[3]}`)
-
-    com.mode.devlog (`pc = ${pc.get()}`)
-    com.mode.devlog (`ir = ${ir.get()}`)
-    pc.put (5)
-    com.mode.devlog (`pc = ${pc.get()}`)
-    com.mode.devlog ("^^^^^^^^^^ execute instruction thats all folks")
-    */
-
-    com.mode.devlog ('executeInstruction');
-    es.nInstructionsExecuted++;
-    st.incrSCB (es, st.SCB_nInstrExecuted)
-    com.mode.devlog (`ExInstr nInstrExecuted=${es.nInstructionsExecuted}`)
-    if (es.mode === Mode_GuiDisplay) {
-        updateInstructionCount (es.nInstructionsExecuted)
-        //    document.getElementById("nInstrExecuted").innerHTML = es.nInstructionsExecuted;
-    }
-
-// Check for interrupt
-    //    let mr = es.mask.get() & es.req.get(); ??????????????????????
-    let mr = 0
-//    com.mode.devlog (`interrupt mr = ${arith.wordToHex4(mr)}`);
-    //    if (arith.getBitInRegBE (es.statusreg,arch.intEnableBit) && mr) {
-    if (false) { // ????????????????? testing
+    // Check for interrupt
+    let mr = es.mask.get() & es.req.get() // ???
+    com.mode.devlog (`interrupt mr = ${arith.wordToHex4(mr)}`)
+    st.writeSCB (es, st.SCB_cur_instr_addr, es.pc.get())
+    if (arith.getBitInRegBE (es.statusreg, arch.intEnableBit) && mr) {
         com.mode.devlog (`execute instruction: interrupt`)
+        console.log (`execute instruction: interrupt`)
 	let i = 0; // interrupt that is taken
-	while (i<16 && arith.getBitInWordBE(mr,i)==0) { i++ };
-	com.mode.devlog (`\n*** Interrupt ${i} ***`);
-	es.ipc.put(es.pc.get());           // save the pc
-	es.istat.put(es.statusreg.get());   // save the status register
-//	com.mode.devlog (`ipc=${ipc.get()}`);
-//	com.mode.devlog (`req=${arith.wordToHex4(req.get())}`);
-	arith.clearBitInRegBE (req,i);        // clear the interrupt that was taken
-//	com.mode.devlog (`req=${arith.wordToHex4(req.get())}`);
-//	com.mode.devlog (`pc=${arith.wordToHex4(pc.get())}`);
-//	com.mode.devlog (`vect=${arith.wordToHex4(vect.get())} i=${i}`);
-	es.pc.put (es.vect.get() + 2*i);  // jump to handler
-//	com.mode.devlog (`pc=${arith.wordToHex4(pc.get())}`);
+	while (i<16 && arith.getBitInWordBE(mr,i)==0) { i++ }
+	com.mode.devlog (`\n*** Interrupt ${i} ***`)
+	es.rpc.put(es.pc.get())           // save the pc
+	es.rstat.put(es.statusreg.get())   // save the status register
+	arith.clearBitInRegBE (es.req,i)  // clear the interrupt that was taken
+	es.pc.put (es.vect.get() + 2*i)  // jump to handler
         // Disable interrupts and enter system state
-//	com.mode.devlog (`status=${arith.wordToHex4(statusreg.get())}`);
 	es.statusreg.put (es.statusreg.get()
 		       & arith.maskToClearBitBE(arch.intEnableBit)
-		       & arith.maskToClearBitBE(arch.userStateBit));
-//	com.mode.devlog (`statusreg=${arith.wordToHex4(statusreg.get())}`);
-        //	regShowAccesses();
-//        updateRegisters ()
-	return;
-    };
+		       & arith.maskToClearBitBE(arch.userStateBit))
+	return
+    }
 
     // No interrupt, so proceed with next instruction
     com.mode.devlog (`no interrupt, proceeding...`)
@@ -1133,6 +1072,8 @@ export function executeInstruction (es) {
     es.ir.put (instrCode);
     es.nextInstrAddr = arith.binAdd (es.curInstrAddr, 1);
     es.pc.put (es.nextInstrAddr);
+    st.writeSCB (es, st.SCB_next_instr_addr, es.nextInstrAddr)
+
     com.mode.devlog (`ExInstr pcnew=${arith.wordToHex4(es.nextInstrAddr)}`)
     
 // com.mode.devlog('pc = ' + arith.wordToHex4(pc.get()) + ' ir = ' + arith.wordToHex4(instr));
@@ -1151,7 +1092,7 @@ export function executeInstruction (es) {
     es.instrOpStr = arch.mnemonicRRR[es.ir_op]  // Replace if opcode expands
     com.mode.devlog (`ExInstr dispatch primary opcode ${es.ir_op}`);
     dispatch_primary_opcode [es.ir_op] (es);
-//    updateRegisters () // display values and highlighting
+    st.incrSCB (es, st.SCB_nInstrExecuted)
 }
 
 // RRR instruction pattern functions
@@ -1269,22 +1210,35 @@ const cab_dc = (f) => (es) => {
 }
 
 const op_trap = (es) => {
-    let code = es.regfile[es.ir_d].get();
-    com.mode.devlog (`trap code=${code}`);
-    if (code===0) { // Halt
-	com.mode.devlog ("Trap: halt");
-        st.writeSCB (es, st.SCB_halted, 1)
-        setProcStatus (es,Halted);
-        //        refreshRegisters();
-        updateRegisters ()
-        updateMemory (es)
-        memRefresh(es);
-    } else if (code==1) { // Read
-        trapRead(es);
-    } else if (code==2) { // Write
-        trapWrite(es);
-    } else { // Undefined trap is nop
-        com.mode.devlog (`trap with unbound code = ${code}`)
+    switch (es.thread_host) {
+    case ES_gui_thread:
+        console.log (`handle trap in main thread`)
+        let code = es.regfile[es.ir_d].get();
+        com.mode.devlog (`trap code=${code}`);
+        if (code===0) { // Halt
+	    console.log ("Trap: halt");
+	    com.mode.devlog ("Trap: halt");
+            st.writeSCB (es, st.SCB_status, st.SCB_halted)
+            updateRegisters (es)
+            updateMemory (es)
+            memRefresh(es);
+        } else if (code==1) { // Read
+            trapRead(es);
+        } else if (code==2) { // Write
+            trapWrite(es);
+        } else { // Undefined trap is nop
+            com.mode.devlog (`trap with unbound code = ${code}`)
+        }
+        break
+    case ES_worker_thread:
+        console.log (`emworker: relinquish control on a trap`)
+        st.writeSCB (es, st.SCB_status, st.SCB_relinquish)
+        console.log (`trap relinquish before fixup, pc = ${es.pc.get()}`)
+        es.pc.put (st.readSCB (es, st.SCB_cur_instr_addr))
+        console.log (`trap relinquish after fixup, pc = ${es.pc.get()}`)
+        break
+    default:
+        console.log (`system error: trap has bad shm_token ${q}`)
     }
 }
 
@@ -1353,6 +1307,7 @@ const handle_EXP = (es) => {
     let code = 16*es.ir_a + es.ir_b;
     if (code < limitEXPcode) {
 	com.mode.devlog (`>>> dispatching EXP code=${code} d=${es.ir_d}`);
+	console.log (`>>> dispatching EXP code=${code} d=${es.ir_d}`);
 	dispatch_EXP [code] (es);
     } else {
 	com.mode.devlog (`EXP bad code ${arith.wordToHex4(code)}`);
@@ -1430,12 +1385,12 @@ const dispatch_primary_opcode =
         cab_dc (arith.op_muln),   // 5
         cab_dc (arith.op_divn),   // 6
         ab_c  (arith.op_cmp),     // 7
-        ab_dc (arith.op_shift),   // 8
-        op_push,                  // 9
-        op_pop,                   // a
-        op_top,                   // b
-        ab_dc (arith.op_nop),     // c  reserved, currently nop
-        op_trap,                  // d  trap=13
+        op_push,                  // 8
+        op_pop,                   // 9
+        op_top,                   // a
+        ab_dc (arith.op_nop),     // b  reserved, currently nop
+        op_trap,                  // c  trap=13
+        ab_dc (arith.op_nop),     // d  reserved for expanding opcode
         handle_EXP,               // e  escape to EXP
         handle_rx ]               // f  escape to RX
 
@@ -1460,6 +1415,7 @@ const rx = (f) => (es) => {
     es.adr.put (es.instrDisp);
     es.nextInstrAddr = arith.binAdd (es.nextInstrAddr, 1);
     es.pc.put (es.nextInstrAddr);
+    st.writeSCB (es, st.SCB_next_instr_addr, es.nextInstrAddr)
     //    es.ea = arith.binAdd (regFile[es.ir_a].get(), adr.get());
     es.ea = arith.binAdd (es.regfile[es.ir_a].get(), es.instrDisp);
     es.instrEA = es.ea;
@@ -1477,11 +1433,11 @@ const dispatch_RX =
       rx (rx_jal),       // 4
       rx (rx_jumpc0),    // 5
       rx (rx_jumpc1),    // 6
-      rx (rx_jumpz),     // 7
-      rx (rx_jumpnz),    // 8
-      rx (rx_testset),   // 9
-      rx (rx_nop),       // a
-      rx (rx_nop),       // b
+      rx (rx_jumpz),     // 7 should be jumpn ?????????
+      rx (rx_jumpz),     // 8
+      rx (rx_jumpnz),    // 9
+      rx (rx_jumpz),     // a should be jumpp ?????????
+      rx (rx_testset),   // b
       rx (rx_nop),       // c
       rx (rx_nop),       // d
       rx (rx_nop),       // e
@@ -1567,8 +1523,8 @@ function exp1_nop (es) {
 
 function exp1_resume (es) {
     com.mode.devlog ('exp1_resume');
-    es.statusreg.put (es.istat.get());
-    es.pc.put (ies.pc.get());
+    es.statusreg.put (es.rstat.get());
+    es.pc.put (es.rpc.get());
 }
 
 function exp2_save (es) {
@@ -1765,9 +1721,10 @@ const exp1 = (f) => (es) => {
 
 const exp2 = (f) => (es) => {
     com.mode.devlog (`>>> EXP2 instruction`);
-    let expCode = 16*es.ir_a + es.ir_b;
+    console.log (`>>> EXP2 instruction`);
+    let expCode = 16 * es.ir_a + es.ir_b;
     es.instrOpStr = `EXP2 mnemonic code=${expCode}`;  // ????????????
-    es.instrDisp = memFetchInstr (es.pc.get());
+    es.instrDisp = memFetchInstr (es, es.pc.get());
     es.adr.put (es.instrDisp);
     es.nextInstrAddr = arith.binAdd (es.nextInstrAddr, 1);
     es.pc.put (es.nextInstrAddr);
@@ -1787,16 +1744,16 @@ const exp2 = (f) => (es) => {
 
 const dispatch_EXP =
       [ exp1 (exp1_resume),    // 0
-        exp2 (exp2_getctl),    // 1
-        exp2 (exp2_putctl),    // 2
-        exp2 (exp2_logicw),    // 2
-        exp2 (exp2_logicb),    // 4
-        exp2 (exp2_shiftl),    // 5
-        exp2 (exp2_shiftr),    // 6
+        exp2 (exp2_save),      // 1
+        exp2 (exp2_restore),   // 2
+        exp2 (exp2_shiftl),    // 3
+        exp2 (exp2_shiftr),    // 4
+        exp2 (exp2_logicw),    // 5
+        exp2 (exp2_logicb),    // 6
         exp2 (exp2_extract),   // 7
         exp2 (exp2_extracti),  // 8
-        exp2 (exp2_save),      // 9
-        exp2 (exp2_restore)    // a
+        exp2 (exp2_getctl),    // 9
+        exp2 (exp2_putctl)     // a
     ]
 const limitEXPcode = dispatch_EXP.length;  // any code above this is nop
 
@@ -1840,9 +1797,15 @@ function testpane3 () {
 // Emulator gui
 //-----------------------------------------------------------------------------
 
-function updateInstructionCount (n) {
-    document.getElementById("nInstrExecuted").innerHTML = n;
+/*
+function updateInstructionCount (es) {
+    if (es.thread_host === ES_gui_thread) {
+        guiDisplayNinstr (es)
+    }
+// document.getElementById("nInstrExecuted").innerHTML = n;
 }
+*/
+
 
 // Calculate the value of pxPerChar, which is needed to control the
 // scrolling to make the current line visible.  The calculated value
@@ -1879,15 +1842,18 @@ const asmScrollOffsetAbove = 8;
 let pxPerChar = 13.05;
 
 
-
+// Should move to gui.mjs
 function refreshIOlogBuffer() {
     com.mode.devlog (`refreshIOlogBugfer ${ioLogBuffer}`);
+    console.log (`refreshIOlogBugfer ${ioLogBuffer}`);
     let elt = document.getElementById("IOlog");
     elt.innerHTML = "<pre>" + ioLogBuffer + "</pre>";
     elt.scrollTop = elt.scrollHeight;
 }
 
+
 export let ioLogBuffer = "";
+
 // export const procAsmListingElt = document.getElementById('ProcAsmListing');
 
 // export let procAsmListingElt; // global variables for emulator
@@ -1938,8 +1904,9 @@ function memDisplayFast (es) {
     xs = "<pre class='CodePre'><code class='HighlightedTextAsHtml'>"
     	+ memString.slice(xa,xb).join('\n')
 	+ "</code></pre>";
-    com.mode.devlog ('  xa=' + xa + '  xb=' + xb);
-    memElt1.innerHTML = xs;
+//    com.mode.devlog ('  xa=' + xa + '  xb=' + xb);
+    guiDisplayMem (es, es.memElt1, xs)
+//    memElt1.innerHTML = xs;
     yafet = (memFetchDataLog.length===0) ? 0 : (memFetchDataLog[0] - memDispOffset);
     yasto = (memStoreLog.length===0) ? 0 :(memStoreLog[0] - memDispOffset);
     ya = yafet > 0 && yafet < yasto ? yafet : yasto;
@@ -1948,8 +1915,9 @@ function memDisplayFast (es) {
     ys = "<pre class='CodePre'><code class='HighlightedTextAsHtml'>"
 	+ memString.slice(ya,yb).join('\n')
 	+ "</code></pre>";
-    com.mode.devlog ('  ya=' + ya + '  yb=' + yb);
-    memElt2.innerHTML = ys;
+//    com.mode.devlog ('  ya=' + ya + '  yb=' + yb);
+    //    memElt2.innerHTML = ys;
+    guiDisplayMem (es, es.memElt2, xs)
 }
 
 // Set the memory displays, showing the full memory
@@ -1995,12 +1963,6 @@ function memDisplayFull (es) {
     memElt2.scroll(0,yo);
 }
 
-function setProcStatus (es,s) {
-    es.procStatus = s;
-    if (es.mode === Mode_GuiDisplay) {
-        document.getElementById("procStatus").innerHTML = showProcStatus(s);
-    }
-}
 
 // Global variables for handling listing display as program runs.
 
@@ -2016,7 +1978,7 @@ let srcLine;        // copy of source statements
 
 export function initializeSubsystems () {
     memDisplayModeFull = false;
-    document.getElementById('PP_Toggle_Display').value = "Fast display";  
+//     document.getElementById('PP_Toggle_Display').value = "Fast display";  
 }
 
 export function toggleFullDisplay () {
@@ -2083,9 +2045,6 @@ function prepareListingBeforeInstr (es) {
     com.mode.trace = false;
 }
 
-// Number of header lines in the listing before the source lines begin
-const listingLineInitialOffset = 1;
-
 // As it executes an instruction, the emulator sets curInstrAddr and
 // nextInstrAddr.  After the instruction has finished, these
 // instructions are highlighted in the listing
@@ -2096,6 +2055,23 @@ function highlightListingAfterInstr (es) {
     showListingParameters (es)
     com.mode.devlog ('  curInstrAddr = ' + es.curInstrAddr);
     com.mode.devlog ('  nextInstrAddr = ' + es.nextInstrAddr);
+
+// Clear any statement highlighting, if any
+
+        if (es.curInstrLineNo >= 0) {
+        com.mode.devlog (`prepare resetting cur: line ${es.curInstrLineNo}`)
+        showLst (es, "prepare before revert current", es.curInstrLineNo)
+        com.revertListingLine (es, es.curInstrLineNo)
+        showLst (es, "prepare after revert current", es.curInstrLineNo)
+    }
+    if (es.nextInstrLineNo >= 0) {
+        com.mode.devlog (`prepare resetting next: line ${es.nextInstrLineNo}`)
+        showLst (es, "prepare before revert next", es.nextInstrLineNo)
+        com.revertListingLine (es, es.nextInstrLineNo)
+        showLst (es, "prepare after revert next", es.nextInstrLineNo)
+    }
+    es.curInstrLineNo = -1;
+    es.nextInstrLineNo = -1;
 
     // Highlight the instruction that just executed
     es.curInstrLineNo = es.metadata.getSrcIdx (es.curInstrAddr)
@@ -2152,42 +2128,37 @@ function setProcAsmListing (es) {
 
 // Processor elements: html elements for displaying instruction decode
 
-let instrCodeElt;
-let instrFmtElt;
-let instrOpElt;
-let instrArgsElt;
-let instrEAElt;
-let instrCCElt;
-let instrEffect1Elt;
-let instrEffect2Elt;
-
 export function initializeProcessorElements (es) {
-    if (es.mode === Mode_GuiDisplay) {
+    //    if (es.mode === Mode_GuiDisplay) {
+    if (es.thread_host === ES_gui_thread) {
         com.mode.devlog ('initializeProcessorElements');
-        instrCodeElt = document.getElementById("InstrCode");
-        instrFmtElt  = document.getElementById("InstrFmt");
-        instrOpElt   = document.getElementById("InstrOp");
-        instrArgsElt = document.getElementById("InstrArgs");
-        instrEAElt   = document.getElementById("InstrEA");
-        instrCCElt   = document.getElementById("InstrCC");
-        instrEffect1Elt = document.getElementById("InstrEffect1");
-        instrEffect2Elt = document.getElementById("InstrEffect2");
+        es.instrCodeElt = document.getElementById("InstrCode");
+        es.instrFmtElt  = document.getElementById("InstrFmt");
+        es.instrOpElt   = document.getElementById("InstrOp");
+        es.instrArgsElt = document.getElementById("InstrArgs");
+        es.instrEAElt   = document.getElementById("InstrEA");
+        es.instrCCElt   = document.getElementById("InstrCC");
+        es.instrEffect1Elt = document.getElementById("InstrEffect1");
+        es.instrEffect2Elt = document.getElementById("InstrEffect2");
     }
 }
 
 function refreshInstrDecode (es) {
     com.mode.devlog ("refreshInstrDecode");
-    instrCodeElt.innerHTML = es.instrCodeStr;
-    instrFmtElt.innerHTML  = es.instrFmtStr;
-    instrOpElt.innerHTML   = es.instrOpStr;
-    instrArgsElt.innerHTML = showArgs(es); // instrArgsStr;
-    instrEAElt.innerHTML   = es.instrEAStr;
-    let ccval = es.regfile[15].val;
-    instrCCElt.innerHTML      = arith.showCC(ccval);
-    instrEffect1Elt.innerHTML = showEffect(es,0);
-    instrEffect2Elt.innerHTML = showEffect(es,1);
+//    if (false) { // ????????????????????? temporary...
+    if (es.thread_host === ES_gui_thread) {
+        es.instrCodeElt.innerHTML = es.instrCodeStr;
+        es.instrFmtElt.innerHTML  = es.instrFmtStr;
+        es.instrOpElt.innerHTML   = es.instrOpStr;
+        es.instrArgsElt.innerHTML = showArgs(es); // instrArgsStr;
+        es.instrEAElt.innerHTML   = es.instrEAStr;
+        //        let ccval = es.regfile[15].val;
+        let ccval = es.regfile[15].get ()
+        es.instrCCElt.innerHTML      = arith.showCC(ccval);
+        es.instrEffect1Elt.innerHTML = showEffect(es,0);
+        es.instrEffect2Elt.innerHTML = showEffect(es,1);
+    }
 }
-
 
 // Memory display
 
@@ -2227,26 +2198,55 @@ function setMemString(es,a) {
 }
 
 //-------------------------------------------------
-// Display processor state in the gui
+// Register display
 //-------------------------------------------------
 
-// Show any changes to registers in the gui display
+
+// Display any changes to registers with highlighting
 
 function updateRegisters (es) {
-    com.mode.devlog ("--- updateRegisters ---")
+    if (es.thread_host != ES_gui_thread) {
+        console.log (`updateRegisters host=${es.thread_host}: skipping`)
+        return
+    }
     // Clear previous highlighting by refreshing the registers
-    for (let x of regFetchedOld) { x.refresh () }
-    for (let x of regStoredOld)  { x.refresh () }
+    console.log (`${es.regFetchedOld.length}`)
+    console.log (`${es.regStoredOld.length}`)
+    console.log (`${es.regFetched.length}`)
+    console.log (`${es.regStored.length}`)
+    for (let x of es.regFetchedOld) { x.refresh () }
+    for (let x of es.regStoredOld)  { x.refresh () }
     // Update the new register accesses
-    for (let x of regFetched)    { x.highlight ("GET") }
-    for (let x of regStored)     { x.highlight ("PUT") }
-    regFetchedOld = regFetched
-    regStoredOld = regStored
-    regFetched = []
-    regStored = []
-    com.mode.devlog ("--- updateRegisters returning ---")
+    for (let x of es.regFetched) x.highlight ("GET")
+    for (let x of es.regStored)  x.highlight ("PUT")
+    es.regFetchedOld = es.regFetched
+    es.regStoredOld = es.regStored
+    es.regFetched = []
+    es.regStored = []
 }
 
+function initRegHightlghting (es) {
+    es.regFetchedOld = []
+    es.regStoredOld = []
+    es.regFetched = []
+    es.regStored = []
+}
+
+// Display all the registers and remove highlighting.
+
+function refreshRegisters (es) {
+    com.mode.devlog('Refreshing registers');
+    if (es.thread_host != ES_gui_thread) {
+        console.log (`refreshRegisters host=${es.thread_host}, skipping`)
+    }
+    for (let i = 0; i < es.nRegisters; i++) {
+	es.register[i].refresh();
+    }
+    regFetched = []
+    regFetchedOld = []
+    regStored = []
+    regStoredOld = []
+}
 
 //-------------------------------------------------
 // Emulator control from the gui
@@ -2256,20 +2256,26 @@ function updateRegisters (es) {
 
 export function procPause(es) {
     com.mode.devlog ("procPause");
-    setProcStatus (es,Paused);
+    st.showSCBstatus (es)
     st.writeSCB (es, st.SCB_pause_request, 1)
-/* should update the display when the emt responds to its previous run request
-    updateRegisters (es)
-    updateMemory (es)
-    memDisplayFull(es);
-    showInstrDecode (es);
-    highlightListingAfterInstr (es);
-*/
+    st.showSCBstatus (es)
+    console.log ("em wrote procPause request")
 }
 
+//-----------------------------------------------------------------------------
+// Gui display
+//-----------------------------------------------------------------------------
 
+// These functions display information on the gui; they abstract the
+// document DOM out of the emulator
 
+export function guiDisplayNinstr (es) {
+    if (es.thread_host === ES_gui_thread) {
+        let n = st.readSCB (es, st.SCB_nInstrExecuted)
+        document.getElementById("nInstrExecuted").innerHTML = n
+    }
+}
 
-// ----------------------------------------------------------------------------
-// Deprecated
-// ----------------------------------------------------------------------------
+export function guiDisplayMem (es, elt, xs) {
+    if (es.thread_host === ES_gui_thread) elt.innerHTML = xs
+}
