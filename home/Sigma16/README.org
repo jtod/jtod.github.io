@@ -157,7 +157,7 @@ software, and are not recommended for general use.
 - This is a pre-release for the next version, intended for development
   and testing of the software.  It is probably unstable and is not
   recommended for general users.  However, it may contain new features
-  not yet in the latest release.
+  not yet in the latest release.  Testing
 
 - [[./testing/compatibility/worker.html][compatibility test w]]
 
