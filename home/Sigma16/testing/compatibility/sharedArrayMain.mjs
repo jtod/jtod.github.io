@@ -16,13 +16,21 @@ function printarr () {
 
 output ("<br>Starting<br>")
 
-output ("<br>Defining shared array<br>")
+function shmFeatureTest () {
+    let ok = false
+    let a = true
+    return ok
+}
 
+output ("<br>Defining shared array buffer<br>")
 const n = 5
 const nb = 2 * n
 export const sysStateBuf = new SharedArrayBuffer (nb)
+output ("<br>Have definined shared array buffer<br>")
+
+output ("<br>Defining array view onto buffer<br>")
 export const arr = new Uint16Array (sysStateBuf)
-output ("<br> Defined arr <br>")
+output ("<br> Defined array view onto buffer<br>")
 
 output ("<br>Updating shared array in main thread<br>")
 for (let i = 0;  i < n; i++) arr[i] = i
