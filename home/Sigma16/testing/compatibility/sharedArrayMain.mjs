@@ -1,4 +1,4 @@
-// Compatibility test: typed arrays
+// Compatibility test: shared arrays
 
 let curtext = "<h1>Typed array test</h1>\n<p>"
 
@@ -17,8 +17,11 @@ function printarr () {
 output ("<br>Starting<br>")
 
 output ("<br>Defining array<br>")
+
 const n = 5
-const arr = new Uint16Array (n)
+const nb = 2 * n
+export const sysStateBuf = new SharedArrayBuffer (nb)
+export const arr = new Uint16Array (sysStateBuf)
 output ("<br> Defined arr <br>")
 
 output ("<br>Updating array<br>")
