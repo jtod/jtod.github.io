@@ -17,25 +17,6 @@
 // Configuration: test browser compatibility and set options to
 // configure the app
 
-
-function output (xs) {
-    console.log (`*** output ${xs}`)
-    let txt = document.getElementById("OptionsText").innerHTML
-    document.getElementById("OptionsText").innerHTML = txt + `${xs}<br>`
-}
-
-function printarr () {
-    let xs = "<br>printarr...<br>"
-    for (let i = 0;  i < n; i++) xs += ` ${i}->${arr[i]}`
-    output (xs)
-}
-
-function shmFeatureTest () {
-    let ok = window.SharedArrayBuffer
-    let a = true
-    return ok
-}
-
 function checkBrowserWorkerSupport () {
     output ("checkBrowserWorkerSupport")
     let workersSupported = false
@@ -60,7 +41,21 @@ function checkSharedMemorySupport () {
     return shmSupported
 }
 
-function tryNewShm () {
+function output (xs) {
+    console.log (`*** output ${xs}`)
+    let txt = document.getElementById("OptionsText").innerHTML
+    document.getElementById("OptionsText").innerHTML = txt + `${xs}<br>`
+}
+
+function printarr () {
+    let xs = "<br>printarr...<br>"
+    for (let i = 0;  i < n; i++) xs += ` ${i}->${arr[i]}`
+    output (xs)
+}
+
+
+
+function tryNewShm () { // This fails if it's called and shm isn't supported
     output ("tryNewShm starting")
     maybeShm = new SharedArrayBuffer (10)
     output ("tryNewShm finished")
@@ -83,16 +78,15 @@ function freezeShm (b) {
 }
 
 output ("Starting configuration")
+
+// Discover whether the browser supports key features
+
 const workerOK = checkBrowserWorkerSupport ()
 output (`worker support = ${workerOK}`)
 const shmOK = checkSharedMemorySupport ()
 output (`shared memory support = ${shmOK}`)
 
-let maybeShm
-
-output ("Calling tryNewShm")
-output (tryNewShm () )
-output ("Called tryNewShm")
+// Make an array: shared if possible, unshared otherwise
 
 const n = 5
 const nb = 2 * n
@@ -101,12 +95,12 @@ let arr
 
 freezeShm (false)
 
-output ("<br>Updating shared array in main thread<br>")
+// Test the array
+
+output ("Updating  array")
 for (let i = 0;  i < n; i++) arr[i] = i
-printarr ()
 for (let i = 0;  i < n; i++) arr[i] += 100
 printarr ()
-output ("Updating array...finished")
 
 output ("Finished")
 
@@ -119,5 +113,19 @@ function outputold (xs) {
 
 output ("Trying worker support")
 output ("Trying shared array buffer")
+
+output ("Calling tryNewShm")
+output (tryNewShm () )
+output ("Called tryNewShm")
+
+let maybeShm
+
+function shmFeatureTest () {
+    let ok = window.SharedArrayBuffer
+    let a = true
+    return ok
+}
+printarr ()
+output ("Updating array...finished")
 
 */
