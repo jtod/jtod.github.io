@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-13 Wed 19:57 -->
+<!-- 2021-01-14 Thu 13:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sigma16 home page</title>
@@ -180,7 +180,7 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="index.css" />
+<link rel="stylesheet" type="text/css" href="../docstyle.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -234,12 +234,14 @@ for the JavaScript code in this tag.
 <p>
 Sigma16 is a computer architecture designed for research and teaching
 in computer systems.  This application provides a complete environment
-for experimenting with the architecture.
+for programming in assembly and machine language and experimenting
+with the architecture.
 </p>
 
 <p>
 The app runs in a web browser.  There's no need to download or install
-anything.  Currently it runs in Chrome and Edge, but not in Firefox.
+anything.  Currently it runs in Chrome and Edge, but not in Firefox
+and not in tablets.
 </p>
 
 <div class="quickstartbox">
@@ -251,18 +253,18 @@ anything.  Currently it runs in Chrome and Edge, but not in Firefox.
 <p>
 When you run the app in your browser, it will display the User Guide,
 which contains introductory tutorials as well as a detailed
-yspecirication of the architecture, assembly language, and programming
+specification of the architecture, assembly language, and programming
 techniques.  You can also
 <a href="https://jtod.github.io/home/Sigma16/releases/3.1.3/docs/html/userguide/userguide.html">open
-the User Guide</a>.
+the User Guide in your browser</a>.
 </p>
 
-<div id="outline-container-org9ac3c48" class="outline-3">
-<h3 id="org9ac3c48">Introduction to the architecture</h3>
-<div class="outline-text-3" id="text-org9ac3c48">
+<div id="outline-container-org2d548f0" class="outline-3">
+<h3 id="org2d548f0">Introduction</h3>
+<div class="outline-text-3" id="text-org2d548f0">
 <p>
-This architecture is simpler than most commercial products making it a
-good vehicle for teaching and experimentation.
+This architecture is simpler than most commercial products, making it
+a good vehicle for teaching and experimentation:
 </p>
 
 <ul class="org-ul">
@@ -277,13 +279,12 @@ teaching, and more advanced features support systems programming.</li>
 techniques, data structures, compilation patterns, concurrency and
 mutual exclusion, and more.</li>
 
-<li>There is a digital circuit that implements Sigma16, which includes
-several microarchitecture implementations as well as logic designs
-specified at the level of logic gates and flip flops.  These
-circuits are specified using Hydra, a functional computer hardware
-description language.  Sigma16 programs can be executed using the
-emulator, and they can also be executed by simulating the digital
-circuit using the Hydra tools.</li>
+<li>There is a digital circuit that implements Sigma16. The circuit is
+specified at the level of logic gates and flip flops, and is
+expressed in Hydra, a functional computer hardware description
+language.  Sigma16 programs can be executed using the emulator, and
+they can also be executed by simulating the digital circuit using
+the Hydra tools.</li>
 
 <li>The User Guide is displayed in the running application, and you can
 also read it without launching the program.</li>
@@ -291,14 +292,13 @@ also read it without launching the program.</li>
 </div>
 </div>
 
-<div id="outline-container-org9205674" class="outline-3">
-<h3 id="org9205674">Where to find Sigma16</h3>
-<div class="outline-text-3" id="text-org9205674">
+<div id="outline-container-org34fdc01" class="outline-3">
+<h3 id="org34fdc01">Where to find Sigma16</h3>
+<div class="outline-text-3" id="text-org34fdc01">
 <p>
-To launch Sigma16 via the Internet, visit this home page and click the
-link in the red box above.  That will launch the latest stable
-version.  It's a good idea to bookmark this page:
-[<a href="https://jtod.github.io/home/Sigma16/">https://jtod.github.io/home/Sigma16/</a>](<a href="https://jtod.github.io/home/Sigma16/">https://jtod.github.io/home/Sigma16/</a>)
+It's best to bookmark this page, and to launch the app by clicking the
+link in the red box above.  That will always launch the latest
+released version.
 </p>
 
 <p>
@@ -307,42 +307,13 @@ repository](<a href="https://github.com/jtod/Sigma16/">https://github.com/jtod/S
 directly from the source repository; you need this home page to launch
 it.
 </p>
-
-<p>
-There are links to past releases below.  Normally you shouldn't use
-obsolete releases, but if you encounter a bug in the latest version
-you may be able to work around the problem by running an earlier one.
-If that happens, please file a bug report.  It is essential in a bug
-report (for any software, not just Sigma16) to provide all of the
-following information:
-</p>
-
-<ul class="org-ul">
-<li>State what version of the software you’re running.  This is visible
-in the browser's URL field and also at the top of the User Guide.
-Also, make sure you’re running the latest version!</li>
-
-<li>State what browser and operating system you're using.  There are
-some incompatibilities between Chrome, Firefox, Edge, and Safari, as
-well as differences between operating systems.</li>
-
-<li>Describe what the problem was.</li>
-
-<li>Provide the source code of the assembly language program you’re
-running.</li>
-
-<li>If possible, provide some photos or screen shots showing the app at
-the point where the problem arose.  Smartphone photos are fine.  Be
-sure to show the register display, the assembly listing display, and
-the version number (this is visible in the browser's display of the
-URL, and it's also visible at the top of the User Guide).</li>
-</ul>
 </div>
 </div>
 
-<div id="outline-container-org5a4b3bd" class="outline-3">
-<h3 id="org5a4b3bd">Running the app</h3>
-<div class="outline-text-3" id="text-org5a4b3bd">
+
+<div id="outline-container-org31f7ec4" class="outline-3">
+<h3 id="org31f7ec4">Running the app</h3>
+<div class="outline-text-3" id="text-org31f7ec4">
 <p>
 There are several ways to run the software.  Here is a brief summary;
 for more details see the User Guide.
@@ -373,9 +344,9 @@ See the Installation section in the User Guide.</li>
 </div>
 </div>
 
-<div id="outline-container-orgb92c5aa" class="outline-2">
-<h2 id="orgb92c5aa"><b>Additional software tools.</b> Some of the features of the system,</h2>
-<div class="outline-text-2" id="text-orgb92c5aa">
+<div id="outline-container-org822d0b6" class="outline-2">
+<h2 id="org822d0b6"><b>Additional software tools.</b> Some of the features of the system,</h2>
+<div class="outline-text-2" id="text-org822d0b6">
 <p>
 including the digital circuit simulation, require downloading
 software and executing it in a shell.  These tools won't run in a
@@ -383,18 +354,26 @@ browser.  See the Circuit section in the User Guide.
 </p>
 </div>
 
-<div id="outline-container-orga2207a6" class="outline-4">
-<h4 id="orga2207a6">Releases</h4>
-<div class="outline-text-4" id="text-orga2207a6">
+<div id="outline-container-org90088a3" class="outline-4">
+<h4 id="org90088a3">Releases</h4>
+<div class="outline-text-4" id="text-org90088a3">
 <p>
-The link in the red box at the top of this page runs the latest
-release, which is the top one in the list below.  Links to specific
-releases are given below.  Don't bookmark a specific version unless
-you need it for a specific reason: that will prevent you from
-accessing the latest version.  Previous versions are guaranteed to
-have either missing features, missing documentation, bugs, or all of
-the above.  After all, that’s the reason that old versions get
-replaced by newer ones!
+To run the latest release, click the link in the red box at the top of
+this page.
+</p>
+
+<p>
+Links to older releases appear below.  Normally you shouldn't use
+those, but if you encounter a bug in the latest version you may be
+able to work around the problem by running an earlier one.  Don't
+bookmark a specific version unless you need it for a specific reason,
+as that will prevent you from accessing the latest one.
+</p>
+
+<p>
+Previous versions may have either missing features, missing
+documentation, or bugs.  After all, that’s the reason that old
+versions get replaced by newer ones!
 </p>
 
 <ul class="org-ul">
@@ -417,9 +396,9 @@ replaced by newer ones!
 </div>
 </div>
 
-<div id="outline-container-org4eb3016" class="outline-4">
-<h4 id="org4eb3016">Development version</h4>
-<div class="outline-text-4" id="text-org4eb3016">
+<div id="outline-container-orgc3eeca5" class="outline-4">
+<h4 id="orgc3eeca5">Development version</h4>
+<div class="outline-text-4" id="text-orgc3eeca5">
 <p>
 The following versions are intended for development and testing of the
 software, and are not recommended for general use.
@@ -429,8 +408,8 @@ software, and are not recommended for general use.
 <li><a href="./releases/3.1.4/src/gui/Sigma16.html">Run the latest development
 version</a> This is a pre-release for the next version, intended for
 development and testing of the software.  It may be unstable, and is
-not recommended for general users.  However, it may contain new
-features not yet in the latest release.</li>
+not recommended for general users, but it may contain new features
+not yet in the latest release.</li>
 
 <li><a href="./testing/compatibility/Worker.html">compatibility test: web worker</a></li>
 
@@ -443,20 +422,52 @@ array</a></li>
 <li><a href="./testing/compatibility/FreezeShm.html">compatibility test: freeze
 shared array</a></li>
 
-<li><a href="./testing/compatibility/config.html">config</a></li>
+<li><a href="./testing/compatibility/config.html">config test</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgaf1d2af" class="outline-3">
-<h3 id="orgaf1d2af">About the software</h3>
-<div class="outline-text-3" id="text-orgaf1d2af">
-</div>
-<div id="outline-container-org92260ed" class="outline-4">
-<h4 id="org92260ed">Copyright</h4>
-<div class="outline-text-4" id="text-org92260ed">
+<div id="outline-container-org2573a77" class="outline-3">
+<h3 id="org2573a77">In case of problems</h3>
+<div class="outline-text-3" id="text-org2573a77">
 <p>
-Copyright (C) 2019, 2020 John T. O'Donnell.
+If you encounter a problem with the app, please file a bug report.  It
+is essential in a bug report (for any software, not just Sigma16) to
+provide all of the following information:
+</p>
+
+<ul class="org-ul">
+<li>State what version of the software you’re running.  This is visible
+in the browser's URL field.  Also, make sure you’re running the
+latest version!</li>
+
+<li>State what browser and operating system you're using.  There are
+some incompatibilities between Chrome, Firefox, Edge, and Safari, as
+well as differences between operating systems.</li>
+
+<li>Describe what the problem was.</li>
+
+<li>Provide the source code of the assembly language program you’re
+running.</li>
+
+<li>If possible, provide some photos or screen shots showing the app at
+the point where the problem arose.  Smartphone photos are fine.  Be
+sure to show the register display, the assembly listing display, and
+the version number (this is visible in the browser's display of the
+URL, and it's also visible at the top of the User Guide).</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2d43330" class="outline-3">
+<h3 id="org2d43330">About the software</h3>
+<div class="outline-text-3" id="text-org2d43330">
+</div>
+<div id="outline-container-orga2c861d" class="outline-4">
+<h4 id="orga2c861d">Copyright</h4>
+<div class="outline-text-4" id="text-orga2c861d">
+<p>
+Copyright (C) 2019-2021 John T. O'Donnell.
 </p>
 
 <p>
@@ -467,22 +478,20 @@ john.t.odonnnell9@gmail.com
 </div>
 </div>
 
-<div id="outline-container-org58b0f2c" class="outline-4">
-<h4 id="org58b0f2c">Implementation</h4>
-<div class="outline-text-4" id="text-org58b0f2c">
+<div id="outline-container-orgf7ed559" class="outline-4">
+<h4 id="orgf7ed559">Implementation</h4>
+<div class="outline-text-4" id="text-orgf7ed559">
 <p>
 The Sigma16 app (the integrated development environment &#x2013; i.e. the
 GUI) is implemented in JavaScript, html 5, and css.  The digital
-circuit is implemented in Hydra, which requires Haskell.  Additional
-software tools, including a high speed emulator, are in progress and
-expected to be available in late 2020.
+circuit is implemented in Hydra, which requires Haskell.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org7f24163" class="outline-4">
-<h4 id="org7f24163">License: GPL3</h4>
-<div class="outline-text-4" id="text-org7f24163">
+<div id="outline-container-org1cc5348" class="outline-4">
+<h4 id="org1cc5348">License: GPL3</h4>
+<div class="outline-text-4" id="text-org1cc5348">
 <p>
 Sigma16 is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -936,7 +945,7 @@ The GNU General Public License does not permit incorporating your program into p
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: John T. O'Donnell</p>
-<p class="date">Created: 2021-01-13 Wed 19:57</p>
+<p class="date">Created: 2021-01-14 Thu 13:35</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

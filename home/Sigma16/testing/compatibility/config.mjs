@@ -97,7 +97,7 @@ freezeShm (false)
 
 // Test the array
 
-output ("Updating  array")
+output ("Test: updating  array")
 for (let i = 0;  i < n; i++) arr[i] = i
 for (let i = 0;  i < n; i++) arr[i] += 100
 printarr ()
