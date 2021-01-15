@@ -16,7 +16,7 @@
 
 // Emulator thread
 
-import * as shm from "./shmparams.mjs"
+// import * as shm from "./shmparams.mjs"
 import * as arch from './architecture.mjs'
 import * as arith from './arithmetic.mjs';
 import * as st  from './state.mjs';
