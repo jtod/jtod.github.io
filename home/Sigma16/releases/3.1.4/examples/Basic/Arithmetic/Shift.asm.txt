@@ -1,0 +1,21 @@
+; Shift - demonstrate the shift instructions
+; This file is part of Sigma16.  Copyright (C) 2019, 2020 John T. O'Donnell
+; License: GNU GPL Version 3 or later.  Sigma16/LICENSE.txt, Sigma16/NOTICE.txt
+
+     lea    R1,$0002[R0]     ; 0000 0000 0000 0010
+     lea    R2,3[R0]         ; shift left 3 bits
+     shiftl R3,R1,R2         ; 0000 0000 0001 0000  expected in R3
+
+     lea    R1,$0002[R0]
+     lea    R2,5[R0]
+     shiftl R3,R1,R2
+
+     lea    R1,$0020[R0]
+     lea    R2,3[R0]
+     shiftr R3,R1,R2
+
+     lea    R1,$0020[R0]
+     lea    R2,5[R0]
+     shiftr R3,R1,R2
+
+     trap   R0,R0,R0
