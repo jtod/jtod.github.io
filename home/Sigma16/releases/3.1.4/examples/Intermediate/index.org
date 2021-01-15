@@ -4,10 +4,9 @@
 - [[./DataStructures/index.org][Data structures]]  Arrays, records,
   pointers, linked structures.
 
-- [[./Linking/index.org][Linking]] Modules, import/export, relocation.
+- (Linking) Modules, import/export, relocation.
 
-- [[./Interrupt/index.org][Interrupts]] System control, interrupts,
-  system status, processes.
+- (Interrupts) System control, interrupts, system status, processes.
 
 - [[./Recursion/index.org][Recursion]] Stack frames, recursive procedures.
 
