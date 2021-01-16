@@ -81,18 +81,6 @@ function checkBrowserWorkerSupport () {
 }
 
 //----------------------------------------
-// Start the emulator thread
-//----------------------------------------
-
-// The thread is defined here and will start automatically.  It must
-// be initialized by calling initThreads (), which uses the
-// communication protocol to deliver the shared memory to the worker.
-
-console.log ("gui.mjs starting emwt")
-const emwThread = new Worker("../base/emwt.mjs", {type:"module"});
-console.log ("gui.mjs has started emwt")
-
-//----------------------------------------
 // Communications protocol
 //----------------------------------------
 
@@ -363,42 +351,44 @@ function handleEmwtTest2Response (p) { //
 // Handle responses from emwt
 //----------------------------------------
 
-emwThread.addEventListener ("message", e => {
-    console.log ("main has received a message")
-    if (e.data) {
-        console.log ("main has received data from message")
-        let p = e.data.payload
-        switch (e.data.code) {
-        case 200: // initialize
-            console.log (`main: received 200 init response`)
-            handleEmwtInitResponse (p)
-            break
-        case 201: // emwt step
-            console.log (`main: received 201 step response`)
-            handleEmwtStepResponse (p)
-            break
-        case 202: // emwt run
-            console.log (`main rec 202 run response`)
-            handleEmwtRunResponse (p)
-            break
-        case 203: // emwt show
-            console.log (`main: rec 203 emwt show response`)
-            handleEmwtShowResponse (p)
-            break
-        case 204: // emwt test 1
-            console.log (`main: rec 204 emwt test 1 response`)
-            handleEmwtTest1Response (p)
-            break
-        case 205: // emwt test 2
-            console.log (`main: rec 205 emwt test 2 response`)
-            handleEmwtTest2Response (p)
-            break
-        default:
-            console.log (`main: received unknown code = ${e.data.code}`)
+function initializeEmwtProtocol (es) {
+    emwThread.addEventListener ("message", e => {
+        console.log ("main has received a message")
+        if (e.data) {
+            console.log ("main has received data from message")
+            let p = e.data.payload
+            switch (e.data.code) {
+            case 200: // initialize
+                console.log (`main: received 200 init response`)
+                handleEmwtInitResponse (p)
+                break
+            case 201: // emwt step
+                console.log (`main: received 201 step response`)
+                handleEmwtStepResponse (p)
+                break
+            case 202: // emwt run
+                console.log (`main rec 202 run response`)
+                handleEmwtRunResponse (p)
+                break
+            case 203: // emwt show
+                console.log (`main: rec 203 emwt show response`)
+                handleEmwtShowResponse (p)
+                break
+            case 204: // emwt test 1
+                console.log (`main: rec 204 emwt test 1 response`)
+                handleEmwtTest1Response (p)
+                break
+            case 205: // emwt test 2
+                console.log (`main: rec 205 emwt test 2 response`)
+                handleEmwtTest2Response (p)
+                break
+            default:
+                console.log (`main: received unknown code = ${e.data.code}`)
+            }
+            console.log (`main event handler returning`)
         }
-        console.log (`main event handler returning`)
-    }
-})
+    })
+}
 
 //-------------------------------------------------------------------------------
 // Parameters and global variables
@@ -874,6 +864,7 @@ function configureBrowser (es) {
 
 export let sysStateBuf = null
 export let sysStateVec = null
+let emwThread = null
 
 // Memory is allocated in the main thread and sent to the worker
 // thread, if there is a worker
@@ -884,7 +875,12 @@ function allocateStateVector (es) {
         sysStateBuf = new SharedArrayBuffer (st.EmStateSizeByte)
         sysStateVec = new Uint16Array (sysStateBuf)
         es.shm = sysStateVec
+        // Start the emulator thread and initialize it
+        console.log ("gui.mjs starting emwt")
+        emwThread = new Worker("../base/emwt.mjs", {type:"module"});
+        initializeEmwtProtocol (es)
         emwtInit (es)
+        console.log ("gui.mjs has started emwt")
         break
     case em.ES_gui_thread:
         sysStateVec = new Uint16Array (st.EmStateSizeWord)
@@ -1018,11 +1014,6 @@ function editorButton1() {
     let userGuideElt = document.getElementById("MidMainRight");
     com.mode.devlog("UserGuideElt = " + userGuideElt);
     window.location.hash = "#HREFTESTING";
-	
-//    let loc = userGuideElt.location;
-//    console.log ("ed button 1, loc = " + loc);
-//    loc.href = "#HREFTESTING";
-    
 }
 
 //------------------------------------------------------------------------------
@@ -1173,18 +1164,3 @@ window.onload = function () {
     com.mode.devlog (`Thread ${guiEmulatorState.mode} initialization complete`)
     com.mode.trace = false
 }
-
-// deprecated
-// let flags
-//    flags = new st.emflags (100)
-//    browserSupportsWorkers = checkBrowserWorkerSupport ()
-//    if (browserSupportsWorkers) {
-//        console.log ("Browser supports worker thread<br>")
-//            document.getElementById("OptionsBody").innerHTML =
-//               "Browser supports worker thread<br>"
-// ????? handle feature compatibility testing
-//    } else {
-//           document.getElementById("OptionsBody").innerHTML =
-//               "Browser dows not support worker thready<br>"
-//        console.log ("Browser dows not support worker thready<br>")
-//    }
