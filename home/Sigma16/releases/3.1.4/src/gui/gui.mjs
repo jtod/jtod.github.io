@@ -544,17 +544,13 @@ export function procStep (es) {
     case st.SCB_break:
     case st.SCB_relinquish:
         console.log ("procStep: main thread executing instruction...")
-        alert ("procStep about to execute instruction")
         st.writeSCB (es, st.SCB_status, st.SCB_running_gui)
         em.executeInstruction (es)
         if (st.readSCB (es, st.SCB_status) != st.SCB_halted) {
             st.writeSCB (es, st.SCB_status, st.SCB_ready)
         }
-        alert ("procStep about to do post display")
         em.execInstrPostDisplay (es)
-        alert ("procStep about to display ninstr")
         em.guiDisplayNinstr (es)
-        alert ("procStep finished case")
         break
     case st.SCB_reset:
     case st.SCB_running_gui:
