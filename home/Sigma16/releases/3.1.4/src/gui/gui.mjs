@@ -183,7 +183,7 @@ export function updateClock (es) {
 }
 
 function startClock (es) {
-    em.clearTime (es)
+    clearTime (es)
     updateClock (es)
     es.eventTimer = setInterval (periodicRefresher, guiRefreshInterval)
 }
@@ -209,7 +209,7 @@ function emwtRun (es) { // run until stopping condition; relinquish on trap
     st.writeSCB (guiEmulatorState, st.SCB_status, st.SCB_running_emwt)
     let msg = {code: 102, payload: instrLimit}
     emwThread.postMessage (msg)
-    em.clearTime (guiEmulatorState)
+    clearTime (guiEmulatorState)
     startClock (guiEmulatorState)
     console.log ("main: emwt run posted start message");
 }
@@ -527,6 +527,78 @@ function procRun (es) {
         console.log (`Error procRun ${es.emRunThread}`)
     }
     console.log (`procRun finished`)
+}
+
+// Main interface function to step one instruction; runs in main gui
+// thread
+
+export function procStep (es) {
+    if (es.thread_host != em.ES_gui_thread) {
+        console.log (`procStep: host=${es.thread_host}, skipping`)
+        return
+    }
+    let q = st.readSCB (es, st.SCB_status)
+    switch (q) {
+    case st.SCB_ready:
+    case st.SCB_paused:
+    case st.SCB_break:
+    case st.SCB_relinquish:
+        console.log ("procStep: main thread executing instruction...")
+        alert ("procStep about to execute instruction")
+        st.writeSCB (es, st.SCB_status, st.SCB_running_gui)
+        em.executeInstruction (es)
+        if (st.readSCB (es, st.SCB_status) != st.SCB_halted) {
+            st.writeSCB (es, st.SCB_status, st.SCB_ready)
+        }
+        alert ("procStep about to do post display")
+        em.execInstrPostDisplay (es)
+        alert ("procStep about to display ninstr")
+        em.guiDisplayNinstr (es)
+        alert ("procStep finished case")
+        break
+    case st.SCB_reset:
+    case st.SCB_running_gui:
+    case st.SCB_running_emwt:
+    case st.SCB_halted:
+    case st.SCB_blocked:
+        console.log ("procStep skipping instruction...")
+        break
+    default: console.log (`error: procStep unknown SCB_tatus= ${q}`)
+    }
+}
+
+// Separate clearing state from refreshing display
+export function procReset (es) {
+    console.log ("em reset");
+    com.mode.devlog ("reset the processor");
+    st.resetSCB (es)
+    em.resetRegisters (es);
+    em.memClear (es);
+    clearTime (es)
+    refreshDisplay (es)
+}
+
+export function refreshDisplay (es) {
+    em.refreshRegisters (es);
+    em.memDisplay (es);
+    document.getElementById('ProcAsmListing').innerHTML = "";
+    em.clearInstrDecode (es);
+    em.refreshInstrDecode (es);
+    em.guiDisplayNinstr (es)
+    es.ioLogBuffer = ""
+    em.refreshIOlogBuffer (es)
+    st.showSCBstatus (es)
+//    memClearAccesses ();
+}
+
+
+
+// Time
+
+export function clearTime (es) {
+    const now = new Date ()
+    es.startTime = now.getTime ()
+    document.getElementById("PP_time").innerHTML = `0ms`
 }
 
 
@@ -1028,8 +1100,9 @@ function prepareButton (bid,fcn) {
         .addEventListener('click', event => {fcn()});
 }
 
-// Pane buttons
+// Pane buttons; initialization must occur after emulator state is defined
 
+function initializeButtons () {
 prepareButton ('Welcome_Pane_Button',   () => showPane(WelcomePane));
 prepareButton ('Examples_Pane_Button',  () => showPane(ExamplesPane));
 prepareButton ('Modules_Pane_Button',   () => showPane(ModulesPane));
@@ -1099,14 +1172,14 @@ prepareButton ('LP_Show_Metadata',   link.linkShowMetadata);
 
 // Processor pane (PP)
 prepareButton ('PP_Boot',         () => em.boot (guiEmulatorState));
-prepareButton ('PP_Step',         () => em.procStep (guiEmulatorState));
+prepareButton ('PP_Step',         () => procStep (guiEmulatorState));
 prepareButton ('PP_Run',          () => procRun (guiEmulatorState));
 prepareButton ('PP_RunWorker',    () => emwtRun (guiEmulatorState));
 prepareButton ('PP_Pause',        () => em.procPause (guiEmulatorState));
 prepareButton ('PP_Interrupt',    () => em.procInterrupt (guiEmulatorState));
 prepareButton ('PP_Breakpoint',   () => em.procBreakpoint (guiEmulatorState));
-prepareButton ('PP_Refresh',      () => em.refresh (guiEmulatorState));
-prepareButton ('PP_Reset',        () => em.procReset (guiEmulatorState));
+prepareButton ('PP_Refresh',      () => refresh (guiEmulatorState));
+prepareButton ('PP_Reset',        () => procReset (guiEmulatorState));
 prepareButton ('PP_RunMain',      () => em.procRunMainThread (guiEmulatorState));
 prepareButton ('PP_RunWorker',    () => emwtRun (guiEmulatorState));
 prepareButton ('PP_Test1',        () => test1 (guiEmulatorState))
@@ -1130,6 +1203,7 @@ prepareButton ('DevTools104',    devTools104);
 prepareButton ('DevTools105',    devTools105);
 prepareButton ('DevTools106',    devTools106);
 prepareButton ('DisableDevTools', disableDevTools);
+}
 
 //-------------------------------------------------------------------------------
 // Run the initializers when onload event occurs
@@ -1158,8 +1232,9 @@ window.onload = function () {
     allocateStateVector (guiEmulatorState)
     testSysStateVec (guiEmulatorState)
     em.initializeMachineState (guiEmulatorState)
-    em.procReset (guiEmulatorState)
-    em.clearTime (guiEmulatorState)
+    initializeButtons ()
+    procReset (guiEmulatorState)
+    clearTime (guiEmulatorState)
     com.mode.trace = true
     com.mode.devlog (`Thread ${guiEmulatorState.mode} initialization complete`)
     com.mode.trace = false
