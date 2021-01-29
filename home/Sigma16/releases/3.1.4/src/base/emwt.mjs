@@ -16,6 +16,7 @@
 
 // Emulator worker thread
 
+import * as com from './common.mjs';
 import * as arch from './architecture.mjs'
 import * as arith from './arithmetic.mjs';
 import * as st  from './state.mjs';
@@ -27,9 +28,10 @@ import * as em from "./emulator.mjs"
 
 let emwt = {
     shm: null, // shared system state vector
+//    vec16 : null,
+//    vec32 : null,
     es: null // emulator state
     }
-
 
 //-----------------------------------------------------------------------------
 // Communication protocol
@@ -43,9 +45,17 @@ self.addEventListener ("message", e => {
         switch (e.data.code) {
         case 100: // emwt init: received shared system state vector
             console.log ("emwt: received request init")
-            emwt.shm = e.data.payload
-            emwt.es = new em.EmulatorState (em.ES_worker_thread)
-            emwt.es.shm = e.data.payload
+            emwt.es = new em.EmulatorState (com.ES_worker_thread)
+            emwt.es.vecbuf = e.data.payload
+            emwt.es.vec16 = new Uint16Array (emwt.es.vecbuf)
+            emwt.es.vec32 = new Uint32Array (emwt.es.vecbuf)
+            emwt.es.shm = emwt.es.vec16
+
+            emwt.es.vec32[0] = 123
+            emwt.es.vec32[1] = 2 * emwt.es.vec32[0]
+            console.log (`***foobar**** ${emwt.es.vec32[0]} ${emwt.es.vec32[1]}`)
+
+            
             em.initializeMachineState (emwt.es)
             emwt.initialized = true
             msg = {code: 200, payload: 0}
@@ -333,48 +343,34 @@ function doStep () {
 }
 
 function doRun (limit) {
-    console.log (`emwt: start doRun limit=${limit}`)
-    let count = st.readNinstrExecuted (emwt.es)
-    let curStatus = st.readSCB (emwt.es, st.SCB_status)
-    let curPauseReq = 0
-    console.log (`starting run status${curStatus}`)
-    let continueRunning = curStatus === st.SCB_running_emwt
+    console.log ("emwt doRun")
+    let count = 0
+    let status = 0
+    let pauseReq = false
+    let continueRunning = true
+    let finished = false
     while (continueRunning) {
         em.executeInstruction (emwt.es)
         em.clearLoggingData (emwt.es)
-        count++
-        curPauseReq = st.readSCB (emwt.es, st.SCB_pause_request)
-        if (curPauseReq === 1) {
-            console.log ("emwt received pause request")
-            st.writeSCB (emwt.es, st.SCB_status, st.SCB_paused)
-            st.writeSCB (emwt.es, st.SCB_pause_request, 0)
-            continueRunning = false
+        //        emwt.es.vec32[0] = emwt.es.vec32[0] + 1
+        status = st.readSCB (emwt.es, st.SCB_status)
+        switch (status) {
+        case st.SCB_halted:
+        case st.SCB_paused:
+        case st.SCB_break:
+        case st.SCB_relinquish:
+            finished = true
+            break
+        default:
         }
-        curStatus = st.readSCB (emwt.es, st.SCB_status)
-        if (curStatus === st.SCB_relinquish) {
-            continueRunning = false
-        }
+        pauseReq = st.readSCB (emwt.es, st.SCB_pause_request) != 0
+        continueRunning = !finished  && !pauseReq
     }
-    st.writeNinstrExecuted (emwt.es, count)
-    console.log (`emwt run stopped, count=${count},`
-                 + `status=${curStatus}, pause=${curPauseReq}`)
+    if (pauseReq && status != st.SCB_halted) {
+        st.writeSCB (emwt.es, st.SCB_status, st.SCB_paused)
+        st.writeSCB (emwt.es, st.SCB_pause_request, 0)
+    }
     return count
 }
-
-//    let startTime = performance.now ()
-//    let finishTime = performance.now ()
-//    let elapsedTime = (finishTime - startTime) / 1000
-//    console.log (`emwt: doRun finished, executed ${count} instructions`
-//                 + ` in ${elapsedTime} sec`)
-//     b = curStatus === st.SCB_running_emwt && curPauseReq === 0
-//        b =  (st.readSCB (emwt.es, st.SCB_status) === st.SCB_running_emwt
-//              && st.readSCB (emwt.es, st.SCB_pause_request) === 0)
-//    console.log (`doRun count=${count} b=${b}`)
-//    b =  (st.readSCB (emwt.es, st.SCB_status) === st.SCB_running_emwt
-//          && st.readSCB (emwt.es, st.SCB_pause_request) === 0)
-//        console.log (`doRun count=${count} b=${b}`)
-//        console.log ("emwt doRun execute instruction")
-//    while (st.readSCB (emwt.es, st.SCB_status) === st.SCB_running_emwt
-//           && st.readSCB (emwt.es, st.SCB_pause_request) === 0) {
 
 console.log ("emwthread has been read")

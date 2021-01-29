@@ -440,6 +440,11 @@ guide). */
     height:  100%;
 }
 
+iframe {
+    width: 100%;
+    height:  100%;
+}
+
 /* File pane -------------------------------------------------- */
 
 #ExamplesPaneTopSection {
@@ -976,4 +981,11 @@ don't include fonts as these are specified by HighlightedTextAsHtml
     background-color: white;
 }
 
+.redText {
+    color: red;
+}
 
+.PaneButton {
+    background-color: #f8f8f8;
+    border: none;
+}

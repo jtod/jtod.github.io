@@ -58,16 +58,88 @@ visiting this file in a browser.
 	</textarea>
       </div>
 
+      <div class="DialoguePopup" id="DefaultHelpDialogue">
+	<div class="PaneButtons">
+	  <button id="DefaultHelpClose">Close</button>
+	</div>
+	<iframe src="../../docs/help/defaultHelp.html"
+		name="DefaultHelpIframe"
+		id="DefaultHelp">
+	</iframe>
+      </div>
+
+
+      <div class="DialoguePopup" id="ModulesHelpDialogue">
+	<div class="PaneButtons">
+	  <button id="ModulesHelpClose">Close</button>
+	</div>
+	<iframe src="../../docs/help/modulesHelp.html"
+		name="ModulesHelpIframe"
+		id="ModulesHelp">
+	</iframe>
+      </div>
+
+      <div class="DialoguePopup" id="ExamplesHelpDialogue">
+	<div class="PaneButtons">
+	  <button id="ExamplesHelpClose">Close</button>
+	</div>
+	<iframe src="../../docs/help/examplesHelp.html"
+		name="ExamplesHelpIframe"
+		id="ExamplesHelp">
+	</iframe>
+      </div>
+
+      <div class="DialoguePopup" id="EditorHelpDialogue">
+	<div class="PaneButtons">
+	  <button id="EditorHelpClose">Close</button>
+	</div>
+	<iframe src="../../docs/help/editorHelp.html"
+		name="EditorHelpIframe"
+		id="EditorHelp">
+	</iframe>
+      </div>
+
+      <div class="DialoguePopup" id="AssemblerHelpDialogue">
+	<div class="PaneButtons">
+	  <button id="AssemblerHelpClose">Close</button>
+	</div>
+	<iframe src="../../docs/help/assemblerHelp.html"
+		name="AssemblerHelpIframe"
+		id="AssemblerHelp">
+	</iframe>
+      </div>
+
+      <div class="DialoguePopup" id="LinkerHelpDialogue">
+	<div class="PaneButtons">
+	  <button id="LinkerHelpClose">Close</button>
+	</div>
+	<iframe src="../../docs/help/linkerhelp.html"
+		name="LinkerHelpIframe"
+		id="LinkerHelp">
+	</iframe>
+      </div>
+
+            <div class="DialoguePopup" id="ProcHelpDialogue">
+	<div class="PaneButtons">
+	  <button id="ProcHelpClose">Close</button>
+	</div>
+	<iframe src="../../docs/help/prochelp.html"
+		name="ProcHelpIframe"
+		id="ProcHelp">
+	</iframe>
+      </div>
+
       <div class="TopSection">
-	<button id="Welcome_Pane_Button"> Welcome </button>
-	<button id="Examples_Pane_Button"> Examples </button>
-	<button id="Modules_Pane_Button"> Modules </button>
-	<button id="Editor_Pane_Button"> Editor </button>
-	<button id="Assembler_Pane_Button"> Assembler </button>
-	<button id="Linker_Pane_Button"> Linker </button>
-	<button id="Processor_Pane_Button"> Processor </button>
-	<button id="Options_Pane_Button"> Options </button>
-	<button id="About_Button"> About </button>
+	<button class="PaneButton" id="Welcome_Pane_Button"> Welcome </button>
+	<button class="PaneButton" id="Examples_Pane_Button"> Examples </button>
+	<button class="PaneButton" id="Modules_Pane_Button"> Modules </button>
+	<button class="PaneButton" id="Editor_Pane_Button"> Editor </button>
+	<button class="PaneButton" id="Assembler_Pane_Button"> Assembler </button>
+	<button class="PaneButton" id="Linker_Pane_Button"> Linker </button>
+	<button class="PaneButton" id="Processor_Pane_Button"> Processor </button>
+	<button class="PaneButton" id="Options_Pane_Button"> Options </button>
+	<button class="PaneButton" id="About_Button"> About </button>
+	<button class="PaneButton" id="Toggle_UserGuide"> Hide User Guide </button>
 	<button class="RightButton" id="UG_Resize_Right_Large_Button">
           &#x27f9;
         </button>
@@ -102,7 +174,7 @@ visiting this file in a browser.
 	      </div>
 	      <div class="PaneBody" id="WelcomeHtml">
 		<div class="HtmlUnscrolled">
-		  <iframe src="../datafiles/welcome.html"
+                  <iframe src="../../docs/welcome/welcome.html"
 			  name="WelcomeIframe"
 			  id="WelcomeIframeId">
 		  </iframe>
@@ -112,8 +184,9 @@ visiting this file in a browser.
 
 	    <div class="Pane" id="ExamplesPane">
 	      <div class="PaneButtons">
+		<button id="EXP_Help"> Help </button>
 		<button id="EXP_Examples_Home"> Examples </button>
-		<button id="EXP_Select_Example"> Select example </button>
+		<button id="EXP_Back"> Back </button>
 	      </div>
 	      <div class="PaneBody" id="ExamplesPane">
 		<iframe src="../../examples/index.html"
@@ -125,6 +198,7 @@ visiting this file in a browser.
 
 	    <div class="Pane" id="ModulesPane">
 	      <div class="PaneButtons">
+		<button id="MP_Help"> Help </button>
 		<input type="file" multiple id="FileInput"
                        accept=".asm.txt, .obj.txt, .md.txt, .lnk.txt"
 		       name="myfileselector">
@@ -132,6 +206,9 @@ visiting this file in a browser.
 		<button id="MP_Refresh"> Refresh </button>
 		<button id="MP_New"> New </button>
 		<button id="MP_Hello_world"> Hello, world! </button>
+		<button id="MP_Test1"> Test 1 </button>
+		<button id="MP_Test2"> Test 2 </button>
+		<button id="MP_Test3"> Test 3 </button>
 	      </div>
 	      <div class="HighlightedTextAsHtml" id="FilesBody">
 	      </div>
@@ -139,6 +216,7 @@ visiting this file in a browser.
 	    
 	    <div class="Pane" id="EditorPane">
 	      <div class="PaneButtons">
+		<button id="EDP_Help"> Help </button>
                 <button id="EDP_Selected"> selected </button>
 		<button id="EDP_Clear"> Clear </button>
 		<button id="EDP_Revert"> Revert </button>
@@ -165,6 +243,7 @@ visiting this file in a browser.
 
 	    <div class="Pane" id="AssemblerPane">
 	      <div class="PaneButtons">
+		<button id="AP_Help"> Help </button>
 		<button id="AP_Assemble"> Assemble </button>
 		<button id="AP_Show_Source"> Show source </button>
 		<button id="AP_Show_Object"> Show object </button>
@@ -178,6 +257,7 @@ visiting this file in a browser.
 
 	    <div class="Pane" id="LinkerPane">
 	      <div class="PaneButtons">
+		<button id="LP_Help"> Help </button>
 		<button id="LP_Link"> Link </button>
                 <button id="LP_Show_Executable"> Show executable </button>
                 <button id="LP_Show_Metadata"> Show metadata </button>
@@ -192,14 +272,15 @@ visiting this file in a browser.
 	    
 	    <div class="Pane" id="ProcessorPane">
 	      <div class="PaneButtons">
-		<button id="PP_Boot"> Boot </button>
-		<button id="PP_Step"> Step </button>
-		<button id="PP_Run"> Run </button>
-		<button id="PP_Pause"> Pause </button>
-		<button id="PP_Interrupt"> Interrupt </button>
+		<button id="PP_Help"> <u>H</u>elp </button>
+		<button id="PP_Reset"> Rese<u>t</u> </button>
+		<button id="PP_Boot"> <u>B</u>oot </button>
+		<button id="PP_Step"> <u>S</u>tep </button>
+		<button id="PP_Run"> <u>R</u>un </button>
+		<button id="PP_Pause"> <u>P</u>ause </button>
+		<button id="PP_Interrupt"> <u>I</u>nterrupt </button>
 		<button id="PP_Breakpoint"> Breakpoint </button>
-		<button id="PP_Refresh"> Refresh </button>
-		<button id="PP_Reset"> Reset </button>
+		<button id="PP_Refresh"> Re<u>f</u>resh </button>
                 <button id="PP_RunMain"> RunM </button>
                 <button id="PP_RunWorker"> RunW </button>
                 <button class="Hidden" id="PP_Test1"> Test1 </button>
@@ -376,14 +457,64 @@ visiting this file in a browser.
 	    </div>
 
 	    <div class="Pane" id="OptionsPane">
+              <div class="HighlightedTextAsHtml">
+                <h3> Host capabilities </h3>
+                <p> Sigma16 can use features that are supported by
+                  some, but not all, browsers and platforms.  Here are
+                  the capabilities of your current environment: </p>
+                <ul>
+                  <li> Local storage supported:
+                    <span class="redText" id="SupportLocalStorage"> ? </span>
+                  </li>
+                  <li> Workers supported:
+                    <span class="redText" id="SupportWorker"> ? </span>
+                  </li>
+                  <li> Shared memory supported:
+                    <span class="redText" id="SupportSharedMem"> ? </span>
+                  </li>
+                </ul>
+                <h3> Execution thread </h3>
+                <p> There are several options for running the
+                  emulator, and you can select which one to use if the
+                  browser and platform support the required features.
+                  If the preferred choice isn't supported, Main will
+                  be used. </p>
+                <p>
+                  <input type="radio" name="RunThread" id="RTmain"
+                         value="Main">
+                  <label for="RTmain">
+                    Main with slice size
+                  </label>
+                  <br>
+                  <input type="radio" name="RunThread" id="RTworkerShm"
+                         value="Worker" checked>
+                  <label for="RTworkerShm"> Worker (shared memory) </label> <br>
+                </p>
+                <ul>
+                  <li> Main execution slice size:
+                    <span class="redText" id="MainSliceSize"> ? </span>
+                  </li>
+                  <li> Change main execution slice size:
+                    <input type="text" size=6 value=" " id="EnterMainSliceSize">
+                    <button id="UpdateSliceSize"> Update </button>
+                  </li>
+
+                </ul>
+
+                <h3> More </h3>
+                
+              </div>
+            </div>
+
+            <!--              
 	      <div class="PaneButtons">
-		<button id="Options1"> Options 1 </button>
-		<button id="Options2"> Options 2 </button>
+		<button id="OptMain"> Force main </button>
+		<button id="OptWorker"> Prefer worker </button>
               </div>
               <div class="HighlightedTextAsHtml" id="OptionsBody">
 		<div id="OptionsText"></div>
 	      </div>
-            </div>
+-->
             
 	    <div class="Pane" id="DevToolsPane">
 	      <div class="PaneButtons">
