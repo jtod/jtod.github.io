@@ -199,21 +199,22 @@ function handleKeyDown (e) {
     }
 }
 
+
+function handleTextBufferKeyDown (e) {
+    console.log (`handleTextBbufferKeyDown code=${e.code} keyCode=${e.keyCode}`)
+    e.stopPropagation () // inhibit using key as keyboard shortcut command
+}
+
 // Enable keyboard shortcuts
 document.addEventListener ("keydown", handleKeyDown)
 
 // Disable keyboard shortcuts for text entry buffers
-function handleIOinbufferKeyDown (e) {
-    console.log (`handleIOinbufferKeyDown code=${e.code} keyCode=${e.keyCode}`)
-    e.stopPropagation () // inhibit using key as keyboard shortcut command
-}
-
 document.getElementById("IOinputBuffer")
-    .addEventListener ("keydown", handleIOinbufferKeyDown)
+    .addEventListener ("keydown", handleTextBufferKeyDown)
 document.getElementById("BreakTextArea")
-    .addEventListener ("keydown", handleIOinbufferKeyDown)
+    .addEventListener ("keydown", handleTextBufferKeyDown)
 document.getElementById("EditorTextArea")
-    .addEventListener ("keydown", handleIOinbufferKeyDown)
+    .addEventListener ("keydown", handleTextBufferKeyDown)
 
 
 //-----------------------------------------------------------------------------
