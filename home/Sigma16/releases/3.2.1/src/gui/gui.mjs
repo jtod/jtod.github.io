@@ -216,7 +216,6 @@ document.getElementById("BreakTextArea")
 document.getElementById("EditorTextArea")
     .addEventListener ("keydown", handleTextBufferKeyDown)
 
-
 //-----------------------------------------------------------------------------
 // Interface to emulator
 //-----------------------------------------------------------------------------
