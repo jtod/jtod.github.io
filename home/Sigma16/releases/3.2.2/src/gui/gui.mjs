@@ -1521,7 +1521,6 @@ function initializeButtons () {
     */
 
     // Options
-    prepareButton ('QuerySigServer', checkLatest)
     
     // DevTools
     prepareButton ('DevTools102',    devTools102);
@@ -1539,18 +1538,27 @@ function initializeButtons () {
 
 const SigServerURL = "https://sigma16.herokuapp.com"
 
-function checkLatest () {
-    console.log ("checkLatest starting")
-    fetch (SigServerURL + "/status/latest")
-        .then  (data => {
-            console.log (`checkLatest received data=${data}`)
-            console.log (`data.body = ${data.body}`)
-            document.getElementById('LatestVersion').innerHTML = data
+function findThisVersion () {
+    const v = ver.s16version
+    document.getElementById('ThisVersion').innerHTML = v
+    
+}
+
+function findLatestVersion () {
+    console.log ("findLatestVersion starting")
+    const url = SigServerURL + "/status/latest"
+    fetch (url)
+        .then (function (response) {
+            return response.text()
+        }).then (function (txt) {
+            console.log (`findLatestVersion ${txt}`)
+            document.getElementById('LatestVersion').innerHTML = txt
         })
         .catch (error => {
-            console.log (`checkLatest error ${error}`)
+            console.log (`findLatestVersion error ${error}`)
         })
-    console.log ("checkLatest returning")
+
+    console.log ("findLatestVersion returning")
 }
 
 //-------------------------------------------------------------------------------
@@ -1595,6 +1603,8 @@ window.onload = function () {
     em.clearClock (guiEmulatorState)
     guiEmulatorState.emRunThread = com.ES_gui_thread // default run mode
     em.procReset (guiEmulatorState)
+    findThisVersion ()
+    findLatestVersion ()
     com.mode.trace = true
     com.mode.devlog (`Thread ${guiEmulatorState.mode} initialization complete`)
     com.mode.trace = false
