@@ -1543,7 +1543,8 @@ function checkLatest () {
     console.log ("checkLatest starting")
     fetch (SigServerURL + "/status/latest")
         .then  (data => {
-            console.log (`checkLatest received ${data}`)
+            console.log (`checkLatest received data=${data}`)
+            console.log (`data.body = ${data.body}`)
             document.getElementById('LatestVersion').innerHTML = data
         })
         .catch (error => {
