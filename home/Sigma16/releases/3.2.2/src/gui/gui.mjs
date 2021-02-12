@@ -1537,7 +1537,7 @@ function initializeButtons () {
 // Query SigServer
 //-----------------------------------------------------------------------------
 
-const SigServerURL = "http://sigma16.herokuapp.com"
+const SigServerURL = "https://sigma16.herokuapp.com"
 
 function checkLatest () {
     console.log ("checkLatest starting")
