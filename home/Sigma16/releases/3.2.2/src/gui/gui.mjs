@@ -32,6 +32,7 @@ import * as link  from '../base/linker.mjs';
 import * as em    from '../base/emulator.mjs';
 
 export const procAsmListingElt = document.getElementById('ProcAsmListing');
+let latestVersion = 'unknown'
 
 //-----------------------------------------------------------------------------
 // Dev tools
@@ -1531,34 +1532,42 @@ function initializeButtons () {
     prepareButton ('DisableDevTools', disableDevTools);
 }
 
-
 //-----------------------------------------------------------------------------
-// Query SigServer
+// Query SigServer for latest version
 //-----------------------------------------------------------------------------
 
-const SigServerURL = "https://sigma16.herokuapp.com"
+// Find version number of currently running program and set it in the gui
 
 function findThisVersion () {
     const v = ver.s16version
     document.getElementById('ThisVersion').innerHTML = v
-    
 }
 
+// Query Sigma16 home page on github pages for the SigServer location,
+// then query server for the latest version number
+
 function findLatestVersion () {
-    console.log ("findLatestVersion starting")
-    const url = SigServerURL + "/status/latest"
-    fetch (url)
-        .then (function (response) {
-            return response.text()
-        }).then (function (txt) {
-            console.log (`findLatestVersion ${txt}`)
-            document.getElementById('LatestVersion').innerHTML = txt
+    console.log ("*** findLatestVersion starting")
+    const serverAddressLoc = `${com.S16HOMEPAGEURL}/admin/SIGSERVERURL.txt`
+    fetch (serverAddressLoc)
+        .then (repositoryResponse => {
+            return repositoryResponse.text()
+        }).then (serverURL => {
+            const latestURL = `${serverURL}/status/latest/${ver.s16version}`
+            console.log (`*** findLatestVersion server= ${serverURL}`)
+            console.log (`*** findLatestVersion latestURL= ${latestURL}`)
+            return fetch (latestURL)
+        }).then (serverResponse => {
+            return serverResponse.text()
+        }).then (latest => {
+            console.log (`*** findLatestVersion latest= ${latest}`)
+            latestVersion = latest
+            document.getElementById('LatestVersion').innerHTML = latest
         })
         .catch (error => {
             console.log (`findLatestVersion error ${error}`)
         })
-
-    console.log ("findLatestVersion returning")
+    console.log ("*** findLatestVersion started actions, now returning")
 }
 
 //-------------------------------------------------------------------------------
