@@ -15,10 +15,14 @@ instruction set.
 
 - [[./BitField.asm.txt][BitField]] Bit and bit field manipulation
 
+- [[./Break.asm.txt][Break]] Breakpoint performed by a trap
+
 - [[./Exception.asm.txt][Exception]] Bit and bit field manipulation
 
 - [[./Jumping.asm.txt][Jumping]] Test the comparisons, jumps, and
   conditional jumps.
+
+- [[./LargeAddr.asm.txt][LargeAddr]]
 
 - [[./Linker/index.html][Linker]]
 

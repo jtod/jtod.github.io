@@ -54,8 +54,7 @@ visiting this file in a browser.
 	  <button id="BreakDisable">Disable</button>
 	  <button id="BreakClose">Close</button>
 	</div>
-	<textarea class="Editor" spellcheck="false" id="BreakTextArea">
-	</textarea>
+	<textarea class="Editor" spellcheck="false" id="BreakTextArea"></textarea>
       </div>
 
       <div class="DialoguePopup" id="DefaultHelpDialogue">
@@ -338,37 +337,37 @@ visiting this file in a browser.
 		    <div class="Registers">
 		      <div class="NewRegSecName">Reg File</div>
 		      <div class="RegisterName">R0</div>
-		      <div class="RegisterValue" id="R0">0123</div>
+		      <div class="RegisterValue" id="R0">0000</div>
 		      <div class="RegisterName">R1</div>
-		      <div class="RegisterValue" id="R1">0123</div>
+		      <div class="RegisterValue" id="R1">0000</div>
 		      <div class="RegisterName">R2</div>
-		      <div class="RegisterValue" id="R2">0123</div>
+		      <div class="RegisterValue" id="R2">0000</div>
 		      <div class="RegisterName">R3</div>
-		      <div class="RegisterValue" id="R3">0123</div>
+		      <div class="RegisterValue" id="R3">0000</div>
 		      <div class="RegisterName">R4</div>
-		      <div class="RegisterValue" id="R4">0123</div>
+		      <div class="RegisterValue" id="R4">0000</div>
 		      <div class="RegisterName">R5</div>
-		      <div class="RegisterValue" id="R5">0123</div>
+		      <div class="RegisterValue" id="R5">0000</div>
 		      <div class="RegisterName">R6</div>
-		      <div class="RegisterValue" id="R6">0123</div>
+		      <div class="RegisterValue" id="R6">0000</div>
 		      <div class="RegisterName">R7</div>
-		      <div class="RegisterValue" id="R7">0123</div>
+		      <div class="RegisterValue" id="R7">0000</div>
 		      <div class="RegisterName">R8</div>
-		      <div class="RegisterValue" id="R8">0123</div>
+		      <div class="RegisterValue" id="R8">0000</div>
 		      <div class="RegisterName">R9</div>
-		      <div class="RegisterValue" id="R9">0123</div>
+		      <div class="RegisterValue" id="R9">0000</div>
 		      <div class="RegisterName">R10</div>
-		      <div class="RegisterValue" id="R10">0123</div>
+		      <div class="RegisterValue" id="R10">0000</div>
 		      <div class="RegisterName">R11</div>
-		      <div class="RegisterValue" id="R11">0123</div>
+		      <div class="RegisterValue" id="R11">0000</div>
 		      <div class="RegisterName">R12</div>
-		      <div class="RegisterValue" id="R12">0123</div>
+		      <div class="RegisterValue" id="R12">0000</div>
 		      <div class="RegisterName">R13</div>
-		      <div class="RegisterValue" id="R13">0123</div>
+		      <div class="RegisterValue" id="R13">0000</div>
 		      <div class="RegisterName">R14</div>
-		      <div class="RegisterValue" id="R14">0123</div>
+		      <div class="RegisterValue" id="R14">0000</div>
 		      <div class="RegisterName">R15</div>
-		      <div class="RegisterValue" id="R15">0123</div>
+		      <div class="RegisterValue" id="R15">0000</div>
 		    </div>
 		  </div>
 		  <div class="ProcStateSection" id="InstructionDecode">
@@ -465,9 +464,45 @@ visiting this file in a browser.
                     <span class="redText" id="ThisVersion"> ? </span>
                   </li>
                   <li> Latest release:
-                    <span class="redText" id="LatestVersion"> ? </span>
+                    <span class="redText" id="LatestVersion">
+                      See Sigma16 Home Page
+                    </span>
                   </li>
                 </ul>
+                <h3> Memory display </h3>
+                <p> You can specify a region of the memory to display
+                  after each instruction step.  A larger region is
+                  better for tracing data structures but takes longer
+                  to render.
+                </p>
+
+                <input type="radio" name="MemStepDisplayWindow"
+                       id="MDhba"
+                       value="MDhba">
+                <label for="MDhba">
+                  0 to highest boot address
+                </label>
+                <br>
+
+                <input type="radio" name="MemStepDisplayWindow"
+                       id="MDsliding"
+                       value="MDsliding" checked>
+                <label for="MDsliding">
+                  Sliding window of size
+                  <span class="redText" id="MDslidingSize">
+                    1000
+                  </span>
+                  <input type="text" size=6 id="EnterMDslidingSize">
+                  <button id="UpdateMDslidingSize"> Update </button>
+                </label>
+                <br>
+                <input type="radio" name="MemStepDisplayWindow"
+                       id="MDfull"
+                       value="MDfull">
+                <label for="MDfull">
+                  Full memory display
+                </label>
+
                 <h3> Host capabilities </h3>
                 <p> Sigma16 can use features that are supported by
                   some, but not all, browsers and platforms.  Here are
@@ -496,28 +531,25 @@ visiting this file in a browser.
                   <li> Worker thread available:
                     <span class="redText" id="WorkerThreadOK"> ? </span>
                   </li>
-                  <li> Choose preferred thread: <br>
-                    <input type="radio" name="RunThread" id="RTmain"
-                           value="Main">
-                    <label for="RTmain">
-                      Main
-                    </label>
-                    <br>
-                    <input type="radio" name="RunThread" id="RTworkerShm"
-                           value="Worker" checked>
-                    <label for="RTworkerShm">
-                      Worker with shared memory (if available)
-                    </label>
-                    <br>
-                  </li>
-                  <li> Main execution slice size:
-                    <span class="redText" id="MainSliceSize"> ? </span>
-                  </li>
-                  <li> Change main execution slice size:
-                    <input type="text" size=6 value=" " id="EnterMainSliceSize">
-                    <button id="UpdateSliceSize"> Update </button>
-                  </li>
                 </ul>
+
+                <input type="radio" name="RunThread" id="RTmain"
+                       value="Main">
+                <label for="RTmain">
+                  Main
+                  <span class="redText" id="MainSliceSize"> ? </span>
+                  <input type="text" size=6 value=" " id="EnterMainSliceSize">
+                  <button id="UpdateSliceSize"> Update </button>
+                </label>
+                <br>
+                
+                <input type="radio" name="RunThread" id="RTworkerShm"
+                       value="Worker" checked>
+                <label for="RTworkerShm">
+                  Worker with shared memory (if available)
+                </label>
+                <br>
+
               </div>
             </div>
 
