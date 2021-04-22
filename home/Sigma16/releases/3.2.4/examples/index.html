@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-04-07 Wed 10:43 -->
+<!-- 2021-04-13 Tue 23:14 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sigma16 example programs</title>
@@ -231,21 +231,35 @@ for the JavaScript code in this tag.
 <div id="content">
 <h1 class="title">Sigma16 example programs</h1>
 <ul class="org-ul">
-<li><a href="./Basic/index.html">Basic examples.</a> Simple programs, using basic
-programming techniques and mostly using the core architecture.</li>
+<li><a href="./Core/index.html">Core</a> Simple programs that use only the small
+core subset of the architecture.  The core instructions are add,
+sub, mul, div, trap, lea, load, store, jump, jal, jumpXX.</li>
 
-<li><a href="./Core/index.html">Core examples.</a> Core concepts</li>
+<li><a href="./Standard/index.html">Standard</a> Programs that use the standard
+Sigma16 instruction set.  In addition to the Core instructions,
+there are instructions for logic, bit manipulation, Input/Output,
+flexible implementation of functions and procedures, and more.
+2These programs illustrate intermediate programming techniques, such
+as records, pointers, bit fields, linked data structures, recursion,
+and case dispatch.</li>
 
-<li><a href="./Intermediate/index.html">Intermediate examples</a> These programs
-illustrate intermediate programming techniques, such as records,
-pointers, bit fields, linked data structures, recursion, and case
-dispatch.</li>
+<li><a href="./S16/index.html">S16</a> Programs that use the complete Sigma16
+instruction set architecture.  This is the Standard architecture as
+well as instructions that manipulate the system control registers
+and provide interrupts, segmentation, processes, and mutual
+exclusion.  The full architecture supports simple operating system
+kernels.</li>
+
+<li><a href="./S32/index.html">S32</a> Sigma32 is an extension of Sigma16 to allow
+32 bit full words.  The architecture is backwards compatible with
+Sigma16, and it allows a larger address space as well as operations
+that require full words.</li>
 
 <li><a href="./Testing/index.html">Testing</a> Programs for testing the system.</li>
 </ul>
 </div>
 <div id="postamble" class="status">
-<p class="date">Created: 2021-04-07 Wed 10:43</p>
+<p class="date">Created: 2021-04-13 Tue 23:14</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
