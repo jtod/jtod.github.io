@@ -1,0 +1,28 @@
+mux1
+(Aside: Sometimes it's helpful to describe some signals as *control
+signals* because they affect what the circuit does, and to describe
+others as *data signals* because they carry variable values.  Since
+the behavior of the mux1 is controlled by *c*, this is a control
+input.  Since *x* and *y* are just arbitrary values, these are called
+data signals.  But it's important to realise that this terminology --
+control and data signal -- is just a way of talking about the signals.
+As far as the actual components and wires are concerned, there is no
+difference between data and control.)
+
+This if-then-else expression is a programming construct, and it
+doesn't directly correspond to digital hardware.
+
+mux1
+
+
+# Here is a schematic diagram for a circuit named rtm42:
+# figure
+# [[# ./figures/png/rtm42LogicWorks.png]]
+# This is the corresponding Hydra description:
+#  #+BEGIN_EXAMPLE
+# rtm n k ld add d sa sb x = (a,b,y,c,s)
+#   where
+#     (a,b) = regfile n k ld d sa sb y
+#     y = mux1w add x s
+#     (c,s) = rippleAdd zero (bitslice2 a b)
+# #+END_EXAMPLE
