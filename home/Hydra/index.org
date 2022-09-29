@@ -2,7 +2,7 @@
 # Copyright (c) 2022 John T. O'Donnell.
 # License: GNU GPL Version 3. See Hydra/README, LICENSE
 
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./doc.css"/>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="doc.css"/>
 #+OPTIONS: toc:nil
 #+OPTIONS: num:nil
  
