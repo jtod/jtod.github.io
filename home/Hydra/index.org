@@ -1,15 +1,14 @@
 # Hydra home page
 # Copyright (c) 2022 John T. O'Donnell.
-# License: GNU GPL Version 3. See Hydra/README.md, LICENSE.txt
+# License: GNU GPL Version 3. See Hydra/README, LICENSE
 
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../docstyle.css" />
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./doc.css"/>
 #+OPTIONS: toc:nil
 #+OPTIONS: num:nil
  
 #+BEGIN_EXPORT html
 <h1>Hydra home page</h1>
 #+END_EXPORT
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./docs/doc.css" />
 
 * Hydra
 
@@ -23,3 +22,4 @@ circuit by executing the Hydra specification.
 
 - Source repository: [[https://github.com/jtod/Hydra]]
 - User Guide: [[https://jtod.github.io/home/Hydra/UserGuide/HydraUserGuide.html]]
+- Author: [[https://jtod.github.io/index.html]]
