@@ -7,7 +7,7 @@
 #+OPTIONS: num:nil
  
 #+BEGIN_EXPORT html
-<h1>Hydra README</h1>
+<h1>Hydra home page</h1>
 #+END_EXPORT
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./docs/doc.css" />
 
@@ -22,5 +22,4 @@ is equivalent to the actual circuit semantics, so you can simulate a
 circuit by executing the Hydra specification.
 
 - Source repository: [[https://github.com/jtod/Hydra]]
-- User Guide:
-  [[https://jtod.github.io/home/Hydra/UserGuide/HydraUserGuide.html]]
+- User Guide: [[https://jtod.github.io/home/Hydra/UserGuide/HydraUserGuide.html]]
