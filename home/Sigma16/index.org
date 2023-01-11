@@ -1,5 +1,6 @@
 #+TITLE: Sigma16 home page
 #+AUTHOR: John T. O'Donnell
+#+DATE: January 2023
 #+EMAIL: john.t.odonnell9@gmail.com
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./docstyle.css" />
