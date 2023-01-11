@@ -52,6 +52,8 @@ a good vehicle for teaching and experimentation:
   and they can also be executed by simulating the digital circuit
   using the Hydra tools.
 
+testing
+
 *** About Sigma16
 
 - This sofware is free and open source.
