@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-01-10 Mon 17:58 -->
+<!-- 2023-01-11 Wed 17:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sigma16 home page</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="John T. O'Donnell" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -190,35 +191,18 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { width: 90%; }
-  /*]]>*/-->
+  .org-svg { }
 </style>
-<link rel="stylesheet" type="text/css" href="docstyle.css" />
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
+<link rel="stylesheet" type="text/css" href="./docstyle.css" />
 </head>
 <body>
-<div id="content">
+<div id="preamble" class="status">
+<div class="ManualTitle">Sigma16 home page</div>
+          <div class="ManualAuthor">John T. O'Donnell</div>
+          <div class="ManualDate"></div>
+          <div class="ManualModDate">2023-01-11 Wed 16:55</div>
+</div>
+<div id="content" class="content">
 <h1 class="title">Sigma16 home page</h1>
 <p>
 Sigma16 is a computer architecture designed for research and teaching
@@ -240,9 +224,15 @@ You don't need to download or install anything.
 <p>
 When the app runs in your browser, it will display the User Guide,
 which contains introductory tutorials as well as a detailed
-specification of the architecture, assembly language, and
-programming techniques.
+specification of the architecture, assembly language, and programming
+techniques.  You can also access the User Guide directly, without
+launching the app:
 </p>
+
+<ul class="org-ul">
+<li><a href="https://sigma16.herokuapp.com/Sigma16/build/release/Sigma16/docs/UserGuide/Sigma16UserGuide.html">User Guide (html)</a></li>
+<li><a href="https://sigma16.herokuapp.com/Sigma16/build/release/Sigma16/docs/UserGuide/Sigma16UserGuide.pdf">User Guide (pdf)</a></li>
+</ul>
 
 <p>
 This architecture is simpler than most commercial products, making it
@@ -270,9 +260,9 @@ and they can also be executed by simulating the digital circuit
 using the Hydra tools.</li>
 </ul>
 
-<div id="outline-container-org0d21f4b" class="outline-2">
-<h2 id="org0d21f4b">About Sigma16</h2>
-<div class="outline-text-2" id="text-org0d21f4b">
+<div id="outline-container-org2d7802d" class="outline-2">
+<h2 id="org2d7802d">About Sigma16</h2>
+<div class="outline-text-2" id="text-org2d7802d">
 <ul class="org-ul">
 <li>This sofware is free and open source.</li>
 
@@ -283,9 +273,9 @@ tab, the User Guide, and the Options tab.</li>
 designed and written by John O'Donnell.  See
 <a href="https://jtod.github.io/index.html">https://jtod.github.io/index.html</a>.</li>
 
-<li>Copyright &copy; 2022 John T. O'Donnell</li>
+<li>Copyright &copy; 2023 John T. O'Donnell</li>
 
-<li>License: GNU GPL Version 3 or later</li>
+<li>License: GNU GPL Version 3</li>
 
 <li>The implementation is available on the
 <a href="https://github.com/jtod/Sigma16/">source repository</a>.  The app
@@ -326,9 +316,13 @@ along with Sigma16.  If not, see
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: John T. O'Donnell</p>
-<p class="date">Created: 2022-01-10 Mon 17:58</p>
-<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+<hr>
+          <p class="PostambleTitle">Title: Sigma16 home page</p>
+          <p class="PostambleAuthor">Author: John T. O'Donnell</p>
+          <p class="PostambleEmail">Author's email: <a href="mailto:john.t.odonnell9@gmail.com">john.t.odonnell9@gmail.com</a></p>
+          <p class="PostambleDate">Date: </p>
+          <p class="PostambleDate">Last modified: 2023-01-11 Wed 16:55</p>
+          <p class="PostambleGenerator">Generator: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 28.2 (<a href="https://orgmode.org">Org</a> mode 9.5.5)</p>
 </div>
 </body>
 </html>
