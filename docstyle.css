@@ -9,8 +9,6 @@ body {
     line-height: 140%;
     }
 
-
-
 h1 {
     color: #0000ff;
     border: solid; border-width: thin; border-color: red;
@@ -27,8 +25,8 @@ h2 {padding-top: 1em;
     font-size: 140%;}
 
 A:link    { color: #0000e0; text-decoration: none }
-A:visited { color: #0000a0; text-decoration: none }
-A:hover   { background-color: #e0e0ff; text-decoration: none }
+A:visited { color: blue; text-decoration: none }
+A:hover   { color: red; text-decoration: none }
 
 h2.author {
   text-align: center;

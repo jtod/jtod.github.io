@@ -1,6 +1,6 @@
 #+TITLE: Sigma16 home page
 #+AUTHOR: John T. O'Donnell
-#+DATE: January 2025
+#+DATE: August 2025
 #+EMAIL: john.t.odonnell9@gmail.com
 
 #+HTML_HEAD: <link rel="stylesheet" href="../../docstyle.css"/>
@@ -25,6 +25,11 @@ Opera, DuckDuckGo) but not on Safari or Firefox.
   Click to run Sigma16 </a>
 </div>
 #+END_EXPORT
+
+It's convenient to bookmark this page (save it in your
+Favourites).  The location of this page is permanent.  Please
+don't bookmark the "/Click to run Sigma16/" link, as the
+destination of that link may change from time to time.
 
 When the app runs in your browser, it will display the User
 Guide, which contains introductory tutorials as well as a
@@ -59,47 +64,26 @@ making it a good vehicle for teaching and experimentation:
   executed using the emulator, and they can also be executed
   by simulating the digital circuit using the Hydra tools.
 
-*** About Sigma16
-
-- This sofware is free and open source.
-
-- The version number is given in the running app on the
-  Welcome tab, the User Guide, and the Options tab.
-
-- The architecture, implementation, circuits, and examples
-  are designed and written by John O'Donnell.  See
-  [[https://jtod.github.io/index.html][https://jtod.github.io/index.html]].
-
-- Copyright \copy 2025 John T. O'Donnell
-
-- License: GNU GPL Version 3
-
-- The implementation is available on the [[https://github.com/jtod/Sigma16/][source repository]].
-  The app won't launch directly from the source repository;
-  you need to click the link above on this home page to run
-  it.
-
 - Some components of the system, including the assembler and
   linker, are available as command line tools as well as on
   the graphical user interface provided by the web app.  The
   command line tools require downloading and installation;
   see the User Guide for details.
+  
+*** About Sigma16
 
-- The full text of the license is given in the source
-  repository in Sigma16/LICENSE.txt, as well as at
-  [[https://www.gnu.org/licenses][https://www.gnu.org/licenses]].
+- This sofware is free and open source.  The app is available
+  on the [[https://github.com/jtod/Sigma16/][source repository]].  It won't launch directly from
+  the source repository; you need to click the link above on
+  this home page to run it.  Sigma16 is free software: you
+  can redistribute it and/or modify it under the terms of the
+  GNU General Public License, Version 3, as published by the
+  Free Software Foundation.  See the source repository for
+  details.
 
-Sigma16 is free software: you can redistribute it and/or
-modify it under the terms of the GNU General Public License,
-Version 3, as published by the Free Software Foundation.
+- The architecture, implementation, circuits, documentation,
+  and examples are designed and written by John O'Donnell.
+  See [[https://jtod.github.io/index.html][https://jtod.github.io/index.html]].  Copyright \copy
+  2025 John T. O'Donnell
 
-Sigma16 is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty
-of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
-the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public
-License along with Sigma16.  If not, see
-[[https://www.gnu.org/licenses][https://www.gnu.org/licenses]].
-
-328
+338
