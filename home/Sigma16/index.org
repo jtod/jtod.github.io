@@ -6,8 +6,8 @@
 #+HTML_HEAD: <link rel="stylesheet" href="../../docstyle.css"/>
 #+HTML_HEAD: <link rel="icon" type="image/png" href="../../graphics/favicon.ico"/>
 
-# #+OPTIONS: toc:nil
-# #+OPTIONS: num:nil
+#+OPTIONS: toc:nil
+#+OPTIONS: num:nil
 
 Sigma16 is a computer architecture designed for research and
 teaching in computer systems.  This application provides a
@@ -102,4 +102,4 @@ You should have received a copy of the GNU General Public
 License along with Sigma16.  If not, see
 [[https://www.gnu.org/licenses][https://www.gnu.org/licenses]].
 
-326
+328
