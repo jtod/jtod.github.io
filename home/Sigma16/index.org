@@ -102,8 +102,4 @@ You should have received a copy of the GNU General Public
 License along with Sigma16.  If not, see
 [[https://www.gnu.org/licenses][https://www.gnu.org/licenses]].
 
-<a
-  href="https://sigma16.herokuapp.com/Sigma16/build/dev/Sigma16/Sigma16.html">
-  Development version </a>
-
-325
+326
